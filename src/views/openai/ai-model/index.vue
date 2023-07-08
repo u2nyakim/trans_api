@@ -2,7 +2,7 @@
   <div class="ele-body">
     <a-card :bordered="false">
       <!-- 搜索表单 -->
-      <user-search :where="defaultWhere" @search="reload" />
+      <ai-model-search :where="defaultWhere" @search="reload" />
       <!-- 表格 -->
       <ele-pro-table
         ref="tableRef"
@@ -11,8 +11,8 @@
         :datasource="datasource"
         :scroll="{ x: 1000 }"
         :where="defaultWhere"
-        cache-key="proSystemUserTable"
-        row-key="userId"
+        cache-key="proOpenaiModelTable"
+        row-key="id"
       >
         <template #toolbar>
           <a-space>
@@ -33,40 +33,45 @@
               </template>
               <span>删除</span>
             </a-button>
-            <a-button class="ele-btn-icon" type="dashed" @click="openImport">
+            <a-button class="ele-btn-icon" @click="editGroup">
               <template #icon>
-                <upload-outlined />
+                <group-outlined />
               </template>
-              <span>导入</span>
+              <span>分组管理</span>
             </a-button>
           </a-space>
         </template>
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'nickname'">
-            <router-link :to="'/system/user/details?id=' + record.userId">
-              {{ record.nickname }}
-            </router-link>
-          </template>
-          <template v-else-if="column.key === 'roles'">
-            <a-tag v-for="item in record.roles" :key="item.roleId" color="blue">
-              {{ item.roleName }}
-            </a-tag>
+          <template v-if="column.key === 'name'">
+            <a-tag>{{ record.groupCode }}</a-tag> {{ record.name }}
           </template>
           <template v-else-if="column.key === 'status'">
-            <a-switch
-              :checked="record.status === 0"
-              @change="(checked: boolean) => editStatus(checked, record)"
-            />
+            <template v-if="record.status">
+              <a-tag color="blue">启用</a-tag>
+            </template>
+            <template v-else>
+              <a-tag color="pink">禁用</a-tag>
+            </template>
+          </template>
+          <template v-else-if="column.key === 'feeType'">
+            <span v-if="record.feeType === 0"> 免费 </span>
+            <span v-if="record.feeType === 1"> 按次数计费 </span>
+            <span v-if="record.feeType === 2"> 按Token计费 </span>
+          </template>
+          <template v-else-if="column.key === 'fee'">
+            <span v-if="record.feeType === 0"> - </span>
+            <span v-if="record.feeType === 1"> {{ record.fee }} 积分 </span>
+            <span v-if="record.feeType === 2">
+              1Token / {{ record.fee }}积分
+            </span>
           </template>
           <template v-else-if="column.key === 'action'">
             <a-space>
               <a @click="openEdit(record)">修改</a>
               <a-divider type="vertical" />
-              <a @click="resetPsw(record)">重置密码</a>
-              <a-divider type="vertical" />
               <a-popconfirm
                 placement="topRight"
-                title="确定要删除此用户吗？"
+                title="确定要删除此模型吗？"
                 @confirm="remove(record)"
               >
                 <a class="ele-text-danger">删除</a>
@@ -77,9 +82,9 @@
       </ele-pro-table>
     </a-card>
     <!-- 编辑弹窗 -->
-    <user-edit v-model:visible="showEdit" :data="current" @done="reload" />
-    <!-- 导入弹窗 -->
-    <user-import v-model:visible="showImport" @done="reload" />
+    <ai-model-edit v-model:visible="showEdit" :data="current" @done="reload" />
+    <!-- 分组管理弹窗 -->
+    <ai-model-group v-model:visible="showGroup" @done="reload" />
   </div>
 </template>
 
@@ -90,7 +95,7 @@
     DeleteOutlined,
     ExclamationCircleOutlined,
     PlusOutlined,
-    UploadOutlined
+    GroupOutlined
   } from '@ant-design/icons-vue';
   import type { EleProTable } from 'ele-admin-pro/es';
   import { messageLoading, toDateString } from 'ele-admin-pro/es';
@@ -98,16 +103,15 @@
     ColumnItem,
     DatasourceFunction
   } from 'ele-admin-pro/es/ele-pro-table/types';
-  import UserSearch from './components/user-search.vue';
-  import UserEdit from './components/user-edit.vue';
-  import UserImport from './components/user-import.vue';
+  import AiModelSearch from './components/ai-model-search.vue';
+  import AiModelEdit from './components/ai-model-edit.vue';
+  import AiModelGroup from './components/ai-model-group.vue';
   import {
     pageAiModels,
     removeAiModel,
-    removeAiModels,
-    updateAiModel
+    removeAiModels
   } from '@/api/openai/ai-model';
-  import type { User, UserParam } from '@/api/system/user/model';
+  import type { AiModel, AiModelParam } from '@/api/openai/ai-model/model';
 
   // 表格实例
   const tableRef = ref<InstanceType<typeof EleProTable> | null>(null);
@@ -123,35 +127,33 @@
       customRender: ({ index }) => index + (tableRef.value?.tableIndex ?? 0)
     },
     {
-      title: '用户账号',
-      dataIndex: 'username',
-      sorter: true,
-      showSorterTooltip: false
+      title: '模型名称',
+      key: 'name',
+      showSorterTooltip: false,
+      width: 300
     },
     {
-      title: '用户名',
-      key: 'nickname',
-      dataIndex: 'nickname',
-      sorter: true,
-      showSorterTooltip: false
+      title: '费用',
+      key: 'fee',
+      showSorterTooltip: false,
+      maxWidth: 280
     },
     {
-      title: '性别',
-      dataIndex: 'sexName',
-      width: 80,
-      align: 'center',
-      sorter: true,
-      showSorterTooltip: false
+      title: '收费方式',
+      key: 'feeType',
+      showSorterTooltip: false,
+      maxWidth: 200
     },
     {
-      title: '手机号',
-      dataIndex: 'phone',
-      sorter: true,
-      showSorterTooltip: false
+      title: '状态',
+      key: 'status',
+      showSorterTooltip: false,
+      width: 60
     },
     {
-      title: '角色',
-      key: 'roles'
+      title: '状态描述',
+      dataIndex: 'statusMsg',
+      showSorterTooltip: false
     },
     {
       title: '创建时间',
@@ -159,16 +161,8 @@
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true,
-      customRender: ({ text }) => toDateString(text)
-    },
-    {
-      title: '状态',
-      key: 'status',
-      dataIndex: 'status',
-      sorter: true,
-      showSorterTooltip: false,
-      width: 90,
-      align: 'center'
+      customRender: ({ text }) => toDateString(text),
+      width: 160
     },
     {
       title: '操作',
@@ -179,21 +173,19 @@
   ]);
 
   // 表格选中数据
-  const selection = ref<User[]>([]);
+  const selection = ref<AiModel[]>([]);
 
   // 当前编辑数据
-  const current = ref<User | null>(null);
+  const current = ref<AiModel | null>(null);
 
   // 是否显示编辑弹窗
   const showEdit = ref(false);
 
-  // 是否显示用户导入弹窗
-  const showImport = ref(false);
-
   // 默认搜索条件
   const defaultWhere = reactive({
-    username: '',
-    nickname: ''
+    name: '',
+    status: undefined,
+    feeType: undefined
   });
 
   // 表格数据源
@@ -202,26 +194,21 @@
   };
 
   /* 搜索 */
-  const reload = (where?: UserParam) => {
+  const reload = (where?: AiModelParam) => {
     selection.value = [];
     tableRef?.value?.reload({ page: 1, where });
   };
 
   /* 打开编辑弹窗 */
-  const openEdit = (row?: User) => {
+  const openEdit = (row?: AiModel) => {
     current.value = row ?? null;
     showEdit.value = true;
   };
 
-  /* 打开编辑弹窗 */
-  const openImport = () => {
-    showImport.value = true;
-  };
-
   /* 删除单个 */
-  const remove = (row: User) => {
+  const remove = (row: AiModel) => {
     const hide = messageLoading('请求中..', 0);
-    removeAiModel(row.userId)
+    removeAiModel(row.id)
       .then((msg) => {
         hide();
         message.success(msg);
@@ -241,12 +228,12 @@
     }
     Modal.confirm({
       title: '提示',
-      content: '确定要删除选中的用户吗?',
+      content: '确定要删除选中的模型吗?',
       icon: createVNode(ExclamationCircleOutlined),
       maskClosable: true,
       onOk: () => {
         const hide = messageLoading('请求中..', 0);
-        removeAiModels(selection.value.map((d) => d.userId))
+        removeAiModels(selection.value.map((d) => d.id))
           .then((msg) => {
             hide();
             message.success(msg);
@@ -259,40 +246,10 @@
       }
     });
   };
-
-  /* 重置用户密码 */
-  const resetPsw = (row: User) => {
-    Modal.confirm({
-      title: '提示',
-      content: '确定要重置此用户的密码为"123456"吗?',
-      icon: createVNode(ExclamationCircleOutlined),
-      maskClosable: true,
-      onOk: () => {
-        const hide = messageLoading('请求中..', 0);
-        updateUserPassword(row.userId)
-          .then((msg) => {
-            hide();
-            message.success(msg);
-          })
-          .catch((e) => {
-            hide();
-            message.error(e.message);
-          });
-      }
-    });
-  };
-
-  /* 修改用户状态 */
-  const editStatus = (checked: boolean, row: User) => {
-    const status = checked ? 0 : 1;
-    updateAiModel(row.userId, status)
-      .then((msg) => {
-        row.status = status;
-        message.success(msg);
-      })
-      .catch((e) => {
-        message.error(e.message);
-      });
+  const showGroup = ref(false);
+  /* 打开组管理弹窗 */
+  const editGroup = () => {
+    showGroup.value = true;
   };
 </script>
 

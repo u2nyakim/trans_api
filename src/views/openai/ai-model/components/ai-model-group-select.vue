@@ -1,4 +1,4 @@
-<!-- 性别选择下拉框 -->
+<!-- 模型分组选择下拉框 -->
 <template>
   <a-select
     show-search
@@ -15,7 +15,7 @@
 <script lang="ts" setup>
   import { ref } from 'vue';
   import { message } from 'ant-design-vue/es';
-  import { listDictionaryData } from '@/api/system/dictionary-data';
+  import { listAiModelGroups } from '@/api/openai/ai-model-group';
   import type { SelectProps } from 'ant-design-vue/es';
 
   const emit = defineEmits<{
@@ -25,11 +25,11 @@
 
   withDefaults(
     defineProps<{
-      value?: string;
+      value?: number;
       placeholder?: string;
     }>(),
     {
-      placeholder: '请选择性别'
+      placeholder: '请选择分组'
     }
   );
 
@@ -42,14 +42,12 @@
   };
 
   /* 获取字典数据 */
-  listDictionaryData({
-    dictCode: 'sex'
-  })
+  listAiModelGroups({ limit: 999 })
     .then((list) => {
       data.value = list.map((d) => {
         return {
-          value: d.dictDataCode,
-          label: d.dictDataName
+          value: d.id,
+          label: d.name
         };
       });
     })
