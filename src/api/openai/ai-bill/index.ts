@@ -65,31 +65,31 @@ export async function addAiModel(data: AiBill) {
 /**
  * 删除模型
  */
-// export async function removeAiModel(id?: number) {
-//   const res = await request.delete<ApiResult<unknown>>(
-//     '/openai/ai-model/' + id
-//   );
-//   if (res.data.code === 0) {
-//     return res.data.message;
-//   }
-//   return Promise.reject(new Error(res.data.message));
-// }
+export async function removeAiBill(id?: number) {
+  const res = await request.delete<ApiResult<unknown>>(
+    '/openai/ai-bill/' + id
+  );
+  if (res.data.code === 0) {
+    return res.data.message;
+  }
+  return Promise.reject(new Error(res.data.message));
+}
 
 /**
  * 批量删除模型
  */
-// export async function removeAiModels(data: (number | undefined)[]) {
-//   const res = await request.delete<ApiResult<unknown>>(
-//     '/openai/ai-model/batch',
-//     {
-//       data
-//     }
-//   );
-//   if (res.data.code === 0) {
-//     return res.data.message;
-//   }
-//   return Promise.reject(new Error(res.data.message));
-// }
+export async function removeAiBills(data: (number | undefined)[]) {
+  const res = await request.delete<ApiResult<unknown>>(
+    '/openai/ai-bill/batch',
+    {
+      data
+    }
+  );
+  if (res.data.code === 0) {
+    return res.data.message;
+  }
+  return Promise.reject(new Error(res.data.message));
+}
 
 /**
  * 修改模型状态

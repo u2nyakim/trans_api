@@ -2,7 +2,7 @@
   <div class="ele-body">
     <a-card :bordered="false">
       <!-- 搜索表单 -->
-      <ai-bill-search  @search="reload" />
+      <ai-request-search  @search="reload" />
       <!-- 表格 -->
       <ele-pro-table
         ref="tableRef"
@@ -10,7 +10,6 @@
         :columns="columns"
         :datasource="datasource"
         :scroll="{ x: 1000 }"
-        :where="defaultWhere"
         cache-key="proOpenaiBillTable"
       >
         <template #toolbar>
@@ -22,38 +21,18 @@
               <span>导出</span>
             </a-button>
 
-            <a-button
-              class="ele-btn-icon"
-              danger
-              type="primary"
-              @click="removeBatch"
-            >
-              <template #icon>
-                <delete-outlined />
-              </template>
-              <span>删除</span>
-            </a-button>
-
           </a-space>
         </template>
 
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'status'">
-            <a-tag v-if="record.status === 0" color="red">失败</a-tag>
-            <a-tag v-else-if="record.status === 1" color="green">成功</a-tag>
+            <a-tag v-if="record.status_code === 500" color="red">失败</a-tag>
+            <a-tag v-else-if="record.status_code === 200" color="green">成功</a-tag>
           </template>
 
           <template v-else-if="column.key === 'action'">
             <a-space>
               <a @click="openDetail(record)">详情</a>
-              <a-divider type="vertical" />
-              <a-popconfirm
-                placement="topRight"
-                title="确定要删除此模型吗？"
-                @confirm="remove(record)"
-              >
-                <a class="ele-text-danger">删除</a>
-              </a-popconfirm>
             </a-space>
           </template>
         </template>
@@ -64,7 +43,7 @@
   </div>
 </template>
 
-<script  lang="ts" setup>
+<script lang="ts" setup>
 import {ref} from "vue";
 import {messageLoading, toDateString} from "ele-admin-pro";
 import type { EleProTable } from 'ele-admin-pro/es';
@@ -73,15 +52,14 @@ import type {
   ColumnItem
 } from 'ele-admin-pro/es/ele-pro-table/types';
 
-
 import {utils, writeFile} from "xlsx";
 import {message} from "ant-design-vue/es";
 
-import {listAiBill,pageAiBill,removeAiBill} from "@/api/openai/ai-bill";
-import type{AiBill,AiBillParam} from "@/api/openai/ai-bill/model";
+import {listAiRequests,pageAiRequests,removeAiRequest} from "@/api/openai/ai-requests";
+import type{AiRequests,AiRequestsParam} from "@/api/openai/ai-requests/model";
 
-import AiBillSearch from './components/ai-bill-search.vue';
-import AiBillDetail from './components/ai-bill-detail.vue';
+import AiRequestsSearch from './components/ai-requests-search.vue';
+import AiRequestsDetail from './components/ai-requests-detail.vue';
 
 // 表格实例
 const tableRef = ref<InstanceType<typeof EleProTable> | null>(null);
@@ -98,45 +76,32 @@ const columns = ref<ColumnItem[]>(
       customRender: ({ index }) => index + (tableRef.value?.tableIndex ?? 0)
     },
     {
+      title: '账单id',
+      dataIndex: 'bill_id',
+      sorter: true,
+      showSorterTooltip: false,
+      ellipsis: true
+    },
+    {
       title: '账单uuid',
-      dataIndex: 'uuid',
+      dataIndex: 'bill_uuid',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true
     },
     {
-      title: '账单标签',
-      dataIndex: 'tags',
+      title: '返回状态码',
+      dataIndex: 'status_code',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true
     },
     {
-      title: '账单费用',
-      dataIndex: 'fee',
+      title: '请求接口',
+      dataIndex: 'action',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true
-    },
-    {
-      title: '状态',
-      key: 'status',
-      dataIndex: 'status',
-      sorter: true,
-      showSorterTooltip: false,
-      width: 100,
-      filters: [
-        {
-          text: '失败',
-          value: 0
-        },
-        {
-          text: '成功',
-          value: 1
-        }
-      ],
-      filterMultiple: false,
-      align: 'center'
     },
     {
       title: '创建时间',
@@ -157,12 +122,13 @@ const columns = ref<ColumnItem[]>(
   ]);
 
 // 当前选中数据
-const current = ref<AiBill>({
-  uuid: '',
-  external: '',
-  tags: '',
-  fee: '',
-  status: 0,
+const current = ref<AiRequests>({
+  bill_id: '',
+  bill_uuid: '',
+  status_code: '',
+  action: '',
+  data: 0,
+  result: '',
   create_time: '',
   update_time: ''
 });
@@ -171,7 +137,7 @@ const showInfo = ref(false);
 
 // 表格数据源
 const datasource: DatasourceFunction = ({page, limit, where, orders, filters}) => {
-  return pageAiBill({
+  return pageAiRequests({
     ...where,
     ...orders,
     ...filters,
@@ -180,7 +146,7 @@ const datasource: DatasourceFunction = ({page, limit, where, orders, filters}) =
   });
 };
 /* 刷新表格 */
-const reload = (where?: AiBillParam) => {
+const reload = (where?: AiRequestsParam) => {
   tableRef?.value?.reload({ page: 1, where });
 };
 
@@ -196,42 +162,41 @@ const exportData = () => {
     ]
   ];
 // 请求查询全部(不分页)的接口
-const hide = messageLoading('请求中..', 0);
-tableRef.value?.doRequest(({ where, orders, filters }) => {
-  listAiBill({ ...where, ...orders, ...filters })
-    .then((data) => {
-      hide();
-      data.forEach((d) => {
-        console.log('==============',d)
-        array.push([
-          d.uuid,
-          d.tags,
-          d.fee,
-          ['失败', '成功'][d.status],
-          toDateString(d.createTime)
-        ]);
+  const hide = messageLoading('请求中..', 0);
+  tableRef.value?.doRequest(({ where, orders, filters }) => {
+    listAiRequests({ ...where, ...orders, ...filters })
+      .then((data) => {
+        hide();
+        data.forEach((d) => {
+          array.push([
+            d.uuid,
+            d.tags,
+            d.fee,
+            ['失败', '成功'][d.status],
+            toDateString(d.createTime)
+          ]);
+        });
+        writeFile(
+          {
+            SheetNames: ['Sheet1'],
+            Sheets: {
+              Sheet1: utils.aoa_to_sheet(array)
+            }
+          },
+          '账单列表.xlsx'
+        );
+      })
+      .catch((e) => {
+        hide();
+        message.error(e.message);
       });
-      writeFile(
-        {
-          SheetNames: ['Sheet1'],
-          Sheets: {
-            Sheet1: utils.aoa_to_sheet(array)
-          }
-        },
-        '账单列表.xlsx'
-      );
-    })
-    .catch((e) => {
-      hide();
-      message.error(e.message);
-    });
   });
 };
 
 /* 删除单个 */
-const remove = (row: AiBill) => {
+const remove = (row: AiRequests) => {
   const hide = messageLoading('请求中..', 0);
-  removeAiBill(row.id)
+  removeAiRequest(row.id)
     .then((msg) => {
       hide();
       message.success(msg);
@@ -243,7 +208,7 @@ const remove = (row: AiBill) => {
     });
 };
 /* 详情 */
-const openDetail = (row: AiBill) => {
+const openDetail = (row: AiRequests) => {
   current.value = row;
   showInfo.value = true;
 };
@@ -251,6 +216,8 @@ const openDetail = (row: AiBill) => {
 
 <script lang="ts">
 export default {
-  name: 'ApiOpenaiAiBill'
+  name: 'ApiOpenaiAiRequest'
 };
 </script>
+
+

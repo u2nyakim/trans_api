@@ -26,5 +26,7 @@ export interface AiBill {
  * 账单搜索条件
  */
 export interface AiBillParam extends PageParam {
-  status?: number;
+  uuid?: string;
+  createTimeStart?: string;
+  createTimeEnd?: string;
 }
