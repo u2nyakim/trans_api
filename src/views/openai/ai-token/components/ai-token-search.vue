@@ -16,9 +16,9 @@
             : { span: 6 }
         "
       >
-        <a-form-item label="用户账号">
+        <a-form-item label="关键字">
           <a-input
-            v-model:value.trim="form.username"
+            v-model:value.trim="form.keyword"
             placeholder="请输入"
             allow-clear
           />
@@ -27,36 +27,43 @@
       <a-col
         v-bind="
           styleResponsive
-            ? { xl: 6, lg: 12, md: 12, sm: 24, xs: 24 }
+            ? { xl: 4, lg: 12, md: 12, sm: 12, xs: 12 }
             : { span: 6 }
         "
       >
-        <a-form-item label="用户名">
-          <a-input
-            v-model:value.trim="form.nickname"
-            placeholder="请输入"
+        <a-form-item label="禁用">
+          <a-select
+            v-model:value="form.disable"
+            placeholder="请选择"
             allow-clear
-          />
-        </a-form-item>
-      </a-col>
-      <a-col
-        v-bind="
-          styleResponsive
-            ? { xl: 6, lg: 12, md: 12, sm: 24, xs: 24 }
-            : { span: 6 }
-        "
-      >
-        <a-form-item label="性别">
-          <a-select v-model:value="form.sex" placeholder="请选择" allow-clear>
-            <a-select-option value="1">男</a-select-option>
-            <a-select-option value="2">女</a-select-option>
+          >
+            <a-select-option :value="0">否</a-select-option>
+            <a-select-option :value="1">是</a-select-option>
           </a-select>
         </a-form-item>
       </a-col>
       <a-col
         v-bind="
           styleResponsive
-            ? { xl: 6, lg: 12, md: 12, sm: 24, xs: 24 }
+            ? { xl: 4, lg: 12, md: 12, sm: 12, xs: 12 }
+            : { span: 6 }
+        "
+      >
+        <a-form-item label="状态">
+          <a-select
+            v-model:value="form.status"
+            placeholder="请选择"
+            allow-clear
+          >
+            <a-select-option :value="0">异常</a-select-option>
+            <a-select-option :value="1">正常</a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-col>
+      <a-col
+        v-bind="
+          styleResponsive
+            ? { xl: 2, lg: 12, md: 12, sm: 24, xs: 24 }
             : { span: 6 }
         "
       >
@@ -75,7 +82,7 @@
   import { storeToRefs } from 'pinia';
   import { useThemeStore } from '@/store/modules/theme';
   import useFormData from '@/utils/use-form-data';
-  import type { UserParam } from '@/api/system/user/model';
+  import type { AiTokenParam } from '@/api/openai/ai-token/model';
 
   // 是否开启响应式布局
   const themeStore = useThemeStore();
@@ -83,18 +90,18 @@
 
   const props = defineProps<{
     // 默认搜索条件
-    where?: UserParam;
+    where?: AiTokenParam;
   }>();
 
   const emit = defineEmits<{
-    (e: 'search', where?: UserParam): void;
+    (e: 'search', where?: AiTokenParam): void;
   }>();
 
   // 表单数据
-  const { form, resetFields } = useFormData<UserParam>({
-    username: '',
-    nickname: '',
-    sex: undefined,
+  const { form, resetFields } = useFormData<AiTokenParam>({
+    keyword: '',
+    status: undefined,
+    disable: undefined,
     ...props.where
   });
 

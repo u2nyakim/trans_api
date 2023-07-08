@@ -1,13 +1,13 @@
 import request from '@/utils/request';
 import type { ApiResult, PageResult } from '@/api';
-import type { AiModel, AiModelParam } from './model';
+import type { AiTokenGroup, AiTokenGroupParam } from './model';
 
 /**
- * 分页查询模型
+ * 分页查询AiToken组
  */
-export async function pageAiModels(params: AiModelParam) {
-  const res = await request.get<ApiResult<PageResult<AiModel>>>(
-    '/openai/ai-model/page',
+export async function pageAiTokenGroups(params: AiTokenGroupParam) {
+  const res = await request.get<ApiResult<PageResult<AiTokenGroup>>>(
+    '/openai/ai-token-group/page',
     { params }
   );
   if (res.data.code === 0) {
@@ -17,12 +17,15 @@ export async function pageAiModels(params: AiModelParam) {
 }
 
 /**
- * 查询模型列表
+ * 查询AiToken组列表
  */
-export async function listAiModels(params?: AiModelParam) {
-  const res = await request.get<ApiResult<AiModel[]>>('/openai/ai-model', {
-    params
-  });
+export async function listAiTokenGroups(params?: AiTokenGroupParam) {
+  const res = await request.get<ApiResult<AiTokenGroup[]>>(
+    '/openai/ai-token-group',
+    {
+      params
+    }
+  );
   if (res.data.code === 0 && res.data.data) {
     return res.data.data;
   }
@@ -30,10 +33,12 @@ export async function listAiModels(params?: AiModelParam) {
 }
 
 /**
- * 根据id查询模型
+ * 根据id查询AiToken组
  */
-export async function getAiModel(id: number) {
-  const res = await request.get<ApiResult<AiModel>>('/openai/ai-model/' + id);
+export async function getAiTokenGroup(id: number) {
+  const res = await request.get<ApiResult<AiTokenGroup>>(
+    '/openai/ai-token-group/' + id
+  );
   if (res.data.code === 0 && res.data.data) {
     return res.data.data;
   }
@@ -41,33 +46,12 @@ export async function getAiModel(id: number) {
 }
 
 /**
- * 添加模型
+ * 添加AiToken组
  */
-export async function addAiModel(data: AiModel) {
-  const res = await request.post<ApiResult<unknown>>('/openai/ai-model/', data);
-  if (res.data.code === 0) {
-    return res.data.message;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
- * 修改模型
- */
-export async function updateAiModel(data: AiModel) {
-  const res = await request.put<ApiResult<unknown>>('/openai/ai-model/', data);
-  if (res.data.code === 0) {
-    return res.data.message;
-  }
-  return Promise.reject(new Error(res.data.message));
-}
-
-/**
- * 删除模型
- */
-export async function removeAiModel(id?: number) {
-  const res = await request.delete<ApiResult<unknown>>(
-    '/openai/ai-model/' + id
+export async function addAiTokenGroup(data: AiTokenGroup) {
+  const res = await request.post<ApiResult<unknown>>(
+    '/openai/ai-token-group/',
+    data
   );
   if (res.data.code === 0) {
     return res.data.message;
@@ -76,11 +60,38 @@ export async function removeAiModel(id?: number) {
 }
 
 /**
- * 批量删除模型
+ * 修改AiToken组
  */
-export async function removeAiModels(data: (number | undefined)[]) {
+export async function updateAiTokenGroup(data: AiTokenGroup) {
+  const res = await request.put<ApiResult<unknown>>(
+    '/openai/ai-token-group/',
+    data
+  );
+  if (res.data.code === 0) {
+    return res.data.message;
+  }
+  return Promise.reject(new Error(res.data.message));
+}
+
+/**
+ * 删除AiToken组
+ */
+export async function removeAiTokenGroup(id?: number) {
   const res = await request.delete<ApiResult<unknown>>(
-    '/openai/ai-model/batch',
+    '/openai/ai-token-group/' + id
+  );
+  if (res.data.code === 0) {
+    return res.data.message;
+  }
+  return Promise.reject(new Error(res.data.message));
+}
+
+/**
+ * 批量删除AiToken组
+ */
+export async function removeAiTokenGroups(data: (number | undefined)[]) {
+  const res = await request.delete<ApiResult<unknown>>(
+    '/openai/ai-token-group/batch',
     {
       data
     }
@@ -92,13 +103,19 @@ export async function removeAiModels(data: (number | undefined)[]) {
 }
 
 /**
- * 修改模型状态
+ * 修改AiToken组状态
  */
-export async function updateAiModelStatus(userId?: number, status?: boolean) {
-  const res = await request.put<ApiResult<unknown>>('/openai/ai-model/status', {
-    userId,
-    status
-  });
+export async function updateAiTokenGroupStatus(
+  userId?: number,
+  status?: boolean
+) {
+  const res = await request.put<ApiResult<unknown>>(
+    '/openai/ai-token-group/status',
+    {
+      userId,
+      status
+    }
+  );
   if (res.data.code === 0) {
     return res.data.message;
   }
@@ -106,7 +123,7 @@ export async function updateAiModelStatus(userId?: number, status?: boolean) {
 }
 
 /**
- * 检查模型是否存在
+ * 检查AiToken组是否存在
  */
 export async function checkExistence(
   field: string,
@@ -114,7 +131,7 @@ export async function checkExistence(
   id?: number
 ) {
   const res = await request.get<ApiResult<unknown>>(
-    '/openai/ai-model/existence',
+    '/openai/ai-token-group/existence',
     {
       params: { field, value, id }
     }
