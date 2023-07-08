@@ -30,6 +30,10 @@ export interface User {
   organizationId?: number;
   // 状态, 0正常, 1冻结
   status?: number;
+  // 余额
+  money?: number;
+  // 积分
+  score?: number;
   // 性别名称
   sexName?: string;
   // 机构名称
@@ -46,9 +50,11 @@ export interface User {
  * 用户搜索条件
  */
 export interface UserParam extends PageParam {
+  keywords?: string;
   username?: string;
   nickname?: string;
   sex?: string;
+  email?: string;
   phone?: string;
   status?: number;
   organizationId?: number;
