@@ -26,6 +26,7 @@
     defineProps<{
       value?: string;
       placeholder?: string;
+      data?: any;
     }>(),
     {
       placeholder: '请选择分组'
@@ -68,6 +69,14 @@
   const onBlur = () => {
     emit('blur');
   };
+  watch(
+    () => props.data,
+    (value) => {
+      if (value) {
+        data.value = value;
+      }
+    }
+  );
   watch(
     () => props.value,
     (value) => {

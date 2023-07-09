@@ -124,3 +124,17 @@ export async function checkExistence(
   }
   return Promise.reject(new Error(res.data.message));
 }
+
+/**
+ * 查询模型支持
+ */
+export async function modelsCheck(host: string, sk: string) {
+  const res = await request.post<ApiResult<unknown>>('/openai/ai-model/check', {
+    host,
+    sk
+  });
+  if (res.data.code === 0) {
+    return res.data;
+  }
+  return Promise.reject(new Error(res.data.message));
+}

@@ -42,7 +42,15 @@
             />
           </a-form-item>
           <a-form-item label="支持模型" name="models">
-            <ai-token-models-select v-model:value="form.models" />
+            <ai-token-models-select
+              v-model:value="form.models"
+              v-model:data="models"
+            />
+          </a-form-item>
+          <a-form-item label="检测支持模型" name="models">
+            <a-button :loading="checkLoading" @click="checkModels"
+              >检测支持的模型</a-button
+            >
           </a-form-item>
           <a-form-item label="优先级" name="priority">
             <a-input-number
@@ -98,6 +106,7 @@
   import type { AiToken } from '@/api/openai/ai-token/model';
   import AiTokenGroupSelect from '@/views/openai/ai-token/components/ai-token-group-select.vue';
   import AiTokenModelsSelect from '@/views/openai/ai-token/components/ai-token-models-select.vue';
+  import { modelsCheck } from '@/api/openai/ai-model';
 
   // 是否开启响应式布局
   const themeStore = useThemeStore();
@@ -141,7 +150,39 @@
     status: 0,
     statusMsg: ''
   });
-
+  const models = ref([]);
+  const checkLoading = ref(false);
+  const checkModels = () => {
+    if (!form.host) {
+      message.error('Host不能为空');
+      return false;
+    }
+    if (!form.sk) {
+      message.error('Sk不能为空');
+      return false;
+    }
+    checkLoading.value = true;
+    modelsCheck(form.host, form.sk)
+      .then((res) => {
+        if (res.data) {
+          models.value = res.data
+            .filter((e) => e.object === 'model')
+            .map((item) => {
+              return {
+                value: item.id,
+                label: item.id
+              };
+            });
+          models.value.push({ value: 'dall-e', label: 'dall-e' });
+        }
+        checkLoading.value = false;
+        message.success('检测成功');
+      })
+      .catch(() => {
+        checkLoading.value = false;
+        message.error('检测失败');
+      });
+  };
   // 表单验证规则
   const rules = reactive<Record<string, Rule[]>>({
     host: [
