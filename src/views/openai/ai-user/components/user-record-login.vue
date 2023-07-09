@@ -2,7 +2,7 @@
   <div class="ele-body">
     <a-card :bordered="false">
       <!-- 搜索表单 -->
-      <user-wallet-bill-search @search="reload" />
+      <user-record-login-search @search="reload" />
       <!-- 表格 -->
       <ele-pro-table
         ref="tableRef"
@@ -13,16 +13,18 @@
         cache-key="proSystemLoginRecordTable"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'fundType'">
-            <a-tag v-if="record.fundType === 10" color="green">RMB余额</a-tag>
-            <a-tag v-else-if="record.fundType === 20" color="orange">
-              会话积分
+          <template v-if="column.key === 'loginType'">
+            <a-tag v-if="record.loginType === 0" color="success">
+              登录成功
             </a-tag>
-          </template>
-          <template v-else-if="column.key === 'changeType'">
-            <a-tag v-if="record.changeType === 'i'" color="cyan">增加</a-tag>
-            <a-tag v-else-if="record.changeType === 'd'" color="purple">
-              减少
+            <a-tag v-else-if="record.loginType === 1" color="error">
+              登录失败
+            </a-tag>
+            <a-tag v-else-if="record.loginType === 2" color="warning">
+              退出登录
+            </a-tag>
+            <a-tag v-else-if="record.loginType === 3" color="default">
+              续签token
             </a-tag>
           </template>
         </template>
@@ -39,8 +41,8 @@
     ColumnItem
   } from 'ele-admin-pro/es/ele-pro-table/types';
   import { toDateString } from 'ele-admin-pro/es';
-  import UserWalletBillSearch from '@/views/openai/ai-user/components/user-wallet-bill-search.vue';
-  import { pageUserFundChanges } from '@/api/system/user-fund-change';
+  import UserRecordLoginSearch from '@/views/openai/ai-user/components/user-record-login-search.vue';
+  import { pageLoginRecords } from '@/api/system/login-record';
   import type { UserFundChangeParam } from '@/api/system/user-fund-change/model';
   import { timeAgo } from 'ele-admin-pro/es/utils/core';
   import { User } from '@/api/system/user/model';
@@ -59,53 +61,44 @@
       customRender: ({ index }) => index + (tableRef.value?.tableIndex ?? 0)
     },
     {
-      title: '资产类型',
-      key: 'fundType',
-      sorter: true,
+      title: '操作系统',
+      dataIndex: 'os',
+      sorter: false,
       showSorterTooltip: false,
       width: 100,
       align: 'left'
     },
 
     {
-      title: '操作前余额',
-      dataIndex: 'beforeMoney',
+      title: '设备名',
+      dataIndex: 'device',
+      sorter: false,
+      showSorterTooltip: false,
+      ellipsis: true
+    },
+    {
+      title: '浏览器类型',
+      dataIndex: 'browser',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
-      width: 160
+      width: 100
     },
     {
-      title: '操作后余额',
-      dataIndex: 'afterMoney',
-      sorter: false,
-      showSorterTooltip: false,
-      ellipsis: true,
-      width: 160
-    },
-    {
-      title: '操作金额',
-      dataIndex: 'money',
-      sorter: false,
-      showSorterTooltip: false,
-      ellipsis: true,
-      width: 160
-    },
-    {
-      title: '操作类型',
-      key: 'changeType',
-      sorter: true,
-      showSorterTooltip: false,
-      width: 100,
-      align: 'center'
-    },
-    {
-      title: '来源',
-      dataIndex: 'source',
+      title: 'ip地址',
+      dataIndex: 'ip',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
       width: 120
+    },
+    {
+      title: '操作类型',
+      key: 'loginType',
+      sorter: false,
+      showSorterTooltip: false,
+      width: 100,
+      align: 'left'
     },
     {
       title: '备注',
@@ -115,22 +108,12 @@
       ellipsis: true
     },
     {
-      title: '记录时间',
-      dataIndex: 'createTime',
-      sorter: false,
-      showSorterTooltip: false,
-      ellipsis: true,
-      customRender: ({ text }) => timeAgo(text),
-      width: 160
-    },
-    {
-      title: '创建时间',
+      title: '记录',
       dataIndex: 'createTime',
       sorter: true,
-      showSorterTooltip: false,
-      ellipsis: true,
-      customRender: ({ text }) => toDateString(text),
-      width: 160
+      customRender: ({ text }) =>
+        toDateString(text) + '  🚀 (' + timeAgo(text) + ')',
+      width: 320
     }
   ]);
 
@@ -142,8 +125,8 @@
     orders,
     filters
   }) => {
-    where.userId = props.data.userId;
-    return pageUserFundChanges({
+    where.username = props.data.username;
+    return pageLoginRecords({
       ...where,
       ...orders,
       ...filters,

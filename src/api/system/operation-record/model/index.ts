@@ -16,12 +16,16 @@ export interface OperationRecord {
   url: string;
   // 请求方式
   requestMethod: string;
+  // 请求类型
+  requestContentType: string;
   // 调用方法
   method: string;
   // 请求参数
   params: string;
   // 返回结果
   result: string;
+  // 返回类型
+  contentType: string;
   // 异常信息
   error: string;
   // 消耗时间, 单位毫秒
@@ -50,6 +54,7 @@ export interface OperationRecord {
 export interface OperationRecordParam extends PageParam {
   username?: string;
   module?: string;
+  url?: string;
   createTimeStart?: string;
   createTimeEnd?: string;
   status?: number;

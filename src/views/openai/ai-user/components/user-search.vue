@@ -3,7 +3,7 @@
   <a-card :bordered="false" :body-style="{ paddingBottom: 0 }">
     <a-form
       :label-col="
-        styleResponsive ? { xl: 4, lg: 5, md: 7, sm: 4 } : { flex: '90px' }
+        styleResponsive ? { xl: 6, lg: 5, md: 7, sm: 4 } : { flex: '90px' }
       "
       :wrapper-col="
         styleResponsive ? { xl: 20, lg: 19, md: 17, sm: 20 } : { flex: '1' }

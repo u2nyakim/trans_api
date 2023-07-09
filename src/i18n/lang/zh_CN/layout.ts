@@ -7,10 +7,11 @@ export default {
     logout: '退出登录'
   },
   footer: {
+    blog: '博客',
     website: '官网',
     document: '文档',
     authorization: '授权',
-    copyright: 'Copyright © 2022 武汉易云智科技有限公司'
+    copyright: 'Copyright © 2022 admin.nya.kim'
   },
   logout: {
     title: '提示',

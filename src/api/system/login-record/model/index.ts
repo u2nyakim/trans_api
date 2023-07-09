@@ -34,5 +34,6 @@ export interface LoginRecordParam extends PageParam {
   nickname?: string;
   createTimeStart?: string;
   createTimeEnd?: string;
+  ip?: string;
   loginType?: number;
 }

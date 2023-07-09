@@ -2,22 +2,8 @@
 <template>
   <div class="ele-text-center" style="padding: 16px 0">
     <a-space size="large">
-      <a class="ele-text-secondary" href="https://eleadmin.com" target="_blank">
-        {{ t('layout.footer.website') }}
-      </a>
-      <a
-        class="ele-text-secondary"
-        href="https://eleadmin.com/doc/eleadminpro/"
-        target="_blank"
-      >
-        {{ t('layout.footer.document') }}
-      </a>
-      <a
-        class="ele-text-secondary"
-        href="https://eleadmin.com/goods/9"
-        target="_blank"
-      >
-        {{ t('layout.footer.authorization') }}
+      <a class="ele-text-secondary" href="https://nya.kim" target="_blank">
+        {{ t('layout.footer.blog') }}
       </a>
     </a-space>
     <div class="ele-text-secondary" style="margin-top: 8px">

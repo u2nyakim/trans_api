@@ -2,7 +2,7 @@
 <template>
   <a-form
     :label-col="
-      styleResponsive ? { xl: 4, lg: 5, md: 7, sm: 4 } : { flex: '90px' }
+      styleResponsive ? { xl: 7, lg: 5, md: 7, sm: 4 } : { flex: '90px' }
     "
     :wrapper-col="
       styleResponsive ? { xl: 17, lg: 19, md: 17, sm: 20 } : { flex: '1' }
@@ -12,36 +12,33 @@
       <a-col
         v-bind="
           styleResponsive
-            ? { xl: 4, lg: 12, md: 12, sm: 24, xs: 24 }
+            ? { xl: 6, lg: 12, md: 12, sm: 24, xs: 24 }
             : { span: 6 }
         "
       >
-        <a-form-item label="类型">
-          <a-select
-            v-model:value="form.fundType"
-            placeholder="请选择"
+        <a-form-item label="账单ID">
+          <a-input
+            v-model:value.trim="form.uuid"
+            placeholder="请输入"
             allow-clear
-          >
-            <a-select-option :value="10">RMB余额</a-select-option>
-            <a-select-option :value="20">会话积分</a-select-option>
-          </a-select>
+          />
         </a-form-item>
       </a-col>
       <a-col
         v-bind="
           styleResponsive
-            ? { xl: 4, lg: 12, md: 12, sm: 24, xs: 24 }
+            ? { xl: 6, lg: 12, md: 12, sm: 24, xs: 24 }
             : { span: 6 }
         "
       >
-        <a-form-item label="操作">
+        <a-form-item label="状态">
           <a-select
-            v-model:value="form.changeType"
+            v-model:value="form.status"
             placeholder="请选择"
             allow-clear
           >
-            <a-select-option value="i">增加</a-select-option>
-            <a-select-option value="d">减少</a-select-option>
+            <a-select-option :value="0">失败</a-select-option>
+            <a-select-option :value="1">成功</a-select-option>
           </a-select>
         </a-form-item>
       </a-col>
@@ -63,7 +60,7 @@
       <a-col
         v-bind="
           styleResponsive
-            ? { xl: 2, lg: 12, md: 12, sm: 24, xs: 24 }
+            ? { xl: 6, lg: 12, md: 12, sm: 24, xs: 24 }
             : { span: 6 }
         "
       >
@@ -83,20 +80,19 @@
   import { storeToRefs } from 'pinia';
   import { useThemeStore } from '@/store/modules/theme';
   import useFormData from '@/utils/use-form-data';
-  import type { UserFundChangeParam } from '@/api/system/user-fund-change/model';
+  import type { AiBillParam } from '@/api/openai/ai-bill/model';
 
   // 是否开启响应式布局
   const themeStore = useThemeStore();
   const { styleResponsive } = storeToRefs(themeStore);
 
   const emit = defineEmits<{
-    (e: 'search', where?: UserFundChangeParam): void;
+    (e: 'search', where?: AiBillParam): void;
   }>();
 
   // 表单数据
-  const { form, resetFields } = useFormData<UserFundChangeParam>({
-    fundType: undefined,
-    changeType: undefined
+  const { form, resetFields } = useFormData<AiBillParam>({
+    uuid: ''
   });
 
   // 日期范围选择

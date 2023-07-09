@@ -32,8 +32,8 @@ export interface AiRequests {
  * 请求记录搜索条件
  */
 export interface AiRequestsParam extends PageParam {
-  billUuid?: string;
-  statusCode: number;
+  bill_uuid?: string;
+  status_code: number;
   createTimeStart?: string;
   createTimeEnd?: string;
 }

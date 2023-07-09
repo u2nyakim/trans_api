@@ -156,10 +156,10 @@
       {
         required: true,
         message: '请选择分组',
-        type: 'string',
+        type: 'number',
         trigger: 'blur'
       }
-    ],
+    ]
   });
 
   /* 保存编辑 */

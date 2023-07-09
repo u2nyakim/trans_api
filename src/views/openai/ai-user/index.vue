@@ -58,9 +58,9 @@
             <a-space>
               <a @click="openWallet(record)">用户钱包</a>
               <a-divider type="vertical" />
-              <a @click="openEdit(record)">白名单管理</a>
+              <a @click="openRecord(record)">日志记录</a>
               <a-divider type="vertical" />
-              <a @click="openEdit(record)">修改</a>
+              <a @click="openEdit(record)">用户资料</a>
             </a-space>
           </template>
         </template>
@@ -68,10 +68,23 @@
     </a-card>
     <!-- 编辑弹窗 -->
     <user-edit v-model:visible="showEdit" :data="current" @done="reload" />
-    <!-- 用户账单 -->
-    <user-bill v-model:visible="showBill" :data="current" @done="reload" />
     <!-- 余额管理 -->
-    <user-wallet v-model:visible="showWallet" :data="current" @done="reload" />
+    <user-wallet
+      v-model:visible="showWallet"
+      v-model:data="current"
+      @done="reload"
+      @update-user="
+        (u) => {
+          current.value = u;
+        }
+      "
+    />
+    <!-- 账户日志 -->
+    <user-record
+      v-model:visible="showRecord"
+      v-model:data="current"
+      @done="reload"
+    />
   </div>
 </template>
 
@@ -86,8 +99,9 @@
   import { toDateString } from 'ele-admin-pro/es';
   import UserSearch from './components/user-search.vue';
   import UserEdit from './components/user-edit.vue';
-  import UserBill from './components/user-bill.vue';
   import UserWallet from './components/user-wallet.vue';
+  import UserRecord from './components/user-record.vue';
+
   const showWallet = ref(false);
 
   import { pageUsers } from '@/api/system/user';
@@ -159,13 +173,14 @@
       showSorterTooltip: false
     },
     {
-      title: '创建时间',
+      title: '注册时间',
       dataIndex: 'createTime',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true,
       width: 160,
-      customRender: ({ text }) => toDateString(text)
+      customRender: ({ text }) => toDateString(text),
+      hideInTable: false
     },
     {
       title: '状态',
@@ -179,7 +194,7 @@
     {
       title: '操作',
       key: 'action',
-      width: 350,
+      width: 230,
       align: 'center'
     }
   ]);
@@ -201,6 +216,7 @@
 
   // 表格数据源
   const datasource: DatasourceFunction = ({ page, limit, where, orders }) => {
+    where.keywords = '@OPEN会员';
     return pageUsers({ ...where, ...orders, page, limit });
   };
 
@@ -215,11 +231,15 @@
     current.value = row ?? null;
     showEdit.value = true;
   };
-  const showBill = ref(false);
 
   const openWallet = (row: User) => {
     current.value = row;
     showWallet.value = true;
+  };
+  const showRecord = ref(false);
+  const openRecord = (row: User) => {
+    current.value = row;
+    showRecord.value = true;
   };
 </script>
 

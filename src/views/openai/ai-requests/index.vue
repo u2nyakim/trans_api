@@ -2,7 +2,7 @@
   <div class="ele-body">
     <a-card :bordered="false">
       <!-- 搜索表单 -->
-      <ai-requests-search  @search="reload" />
+      <ai-request-search  @search="reload" />
       <!-- 表格 -->
       <ele-pro-table
         ref="tableRef"
@@ -39,7 +39,7 @@
       </ele-pro-table>
     </a-card>
     <!-- 详情弹窗 -->
-    <ai-requests-detail v-model:visible="showInfo" :data="current" />
+    <ai-bill-detail v-model:visible="showInfo" :data="current" />
   </div>
 </template>
 
@@ -77,24 +77,21 @@ const columns = ref<ColumnItem[]>(
     },
     {
       title: '账单id',
-      dataIndex: 'billId',
-      align: 'center',
+      dataIndex: 'bill_id',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true
     },
     {
       title: '账单uuid',
-      dataIndex: 'billUuid',
-      align: 'center',
+      dataIndex: 'bill_uuid',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true
     },
     {
       title: '返回状态码',
-      dataIndex: 'statusCode',
-      align: 'center',
+      dataIndex: 'status_code',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true
@@ -102,7 +99,6 @@ const columns = ref<ColumnItem[]>(
     {
       title: '请求接口',
       dataIndex: 'action',
-      align: 'center',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true

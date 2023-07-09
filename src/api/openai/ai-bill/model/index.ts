@@ -29,4 +29,5 @@ export interface AiBillParam extends PageParam {
   uuid?: string;
   createTimeStart?: string;
   createTimeEnd?: string;
+  status?: number;
 }

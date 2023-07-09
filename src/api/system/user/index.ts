@@ -63,6 +63,20 @@ export async function updateUser(data: User) {
 }
 
 /**
+ * 修改用户钱包
+ */
+export async function updateUserWallet(data: any) {
+  const res = await request.put<ApiResult<unknown>>(
+    '/system/user-wallet/operate',
+    data
+  );
+  if (res.data.code === 0) {
+    return res.data.message;
+  }
+  return Promise.reject(new Error(res.data.message));
+}
+
+/**
  * 删除用户
  */
 export async function removeUser(id?: number) {
