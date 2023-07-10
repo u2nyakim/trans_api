@@ -27,6 +27,7 @@
   import VChart from 'vue-echarts';
   import { getVisitHourList } from '@/api/dashboard/analysis';
   import useEcharts from '@/utils/use-echarts';
+  import {countRequestsPerMinute} from "@/api/openai/ai-dashboard";
 
   use([
     CanvasRenderer,
@@ -46,14 +47,21 @@
 
   /* 获取最近 1 小时访问情况数据 */
   const getVisitHourData = () => {
-    getVisitHourList()
+    countRequestsPerMinute()
       .then((data) => {
+        data = data.map(d=>{
+          return {
+            time: d.d,
+            views: d.t,
+            visits: 0
+          };
+        });
         Object.assign(visitHourChartOption, {
           tooltip: {
             trigger: 'axis'
           },
           legend: {
-            data: ['浏览量', '访问量'],
+            data: ['负载量', '请求量'],
             right: 20
           },
           xAxis: [
@@ -70,7 +78,7 @@
           ],
           series: [
             {
-              name: '浏览量',
+              name: '负载量',
               type: 'line',
               smooth: true,
               symbol: 'none',
@@ -80,7 +88,7 @@
               data: data.map((d) => d.views)
             },
             {
-              name: '访问量',
+              name: '请求量',
               type: 'line',
               smooth: true,
               symbol: 'none',

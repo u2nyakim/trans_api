@@ -1,0 +1,184 @@
+<html lang="en">
+<head>
+  <title>NyaAdmin-转发系统-登录</title>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <link href="./favicon.ico" rel="icon" type="image/png">
+  <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+  <link href="fonts/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link href="vendor/animate/animate.css" rel="stylesheet" type="text/css">
+  <link href="vendor/css-hamburgers/hamburgers.min.css" rel="stylesheet" type="text/css">
+  <link href="vendor/select2/select2.min.css" rel="stylesheet" type="text/css">
+  <link href="css/util.css" rel="stylesheet" type="text/css">
+  <link href="css/main.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="limiter">
+  <div class="container-login100" style="position: relative;">
+    <div class="wrap-login100">
+      <div class="login100-pic js-tilt" data-tilt="" style="padding-top: 50px;"><img alt="IMG" src="images/img-01.png"></div>
+      <form class="login100-form validate-form">
+        <span class="login100-form-title" style="padding-bottom: 34px;">
+          <span style="font-size: 2em;color: #484646;">
+            <span style="color: #dcc73f;">N</span>
+            <span style="color: #ef5f5f;">y</span>
+            <span style="color: #0ea7e8;">a</span>
+            Admin
+          </span>
+          <div style="margin-top: 15px;">转发KEY系统登录</div>
+        </span>
+        <div class="wrap-input100 validate-input" data-validate="Valid email is required: ex@abc.xyz">
+          <input class="input100" name="email" placeholder="邮箱" type="text">
+          <span class="focus-input100"></span>
+          <span class="symbol-input100"><i aria-hidden="true" class="fa fa-envelope"></i></span>
+        </div>
+        <div class="wrap-input100 validate-input" data-validate="Password is required">
+          <input class="input100" name="pass" placeholder="密码" type="password">
+          <span class="focus-input100"></span>
+          <span class="symbol-input100"><i aria-hidden="true" class="fa fa-lock"></i></span>
+        </div>
+        <div class="wrap-input100" style="position: relative;">
+          <div style="display: flex;">
+            <div style="flex: auto">
+              <input class="input100" name="code" placeholder="请输入验证码" type="text" style="width: 100%;">
+              <span class="focus-input100"></span>
+              <span class="symbol-input100"><i aria-hidden="true" class="fa fa-hashtag"></i></span>
+            </div>
+            <div style="flex: auto;width: 160px;padding:0 5px 0 5px;">
+              <div  style="cursor: pointer;">
+                <img class="login-captcha" />
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+        <div class="container-login100-form-btn">
+          <button class="login100-form-btn" type="button" id="login">登录</button>
+        </div>
+        <div class="text-center p-t-12"><span class="txt1">忘记</span><a class="txt2" href="#">密码?</a></div>
+        <div class="text-center p-t-136"><a class="txt2" href="../register.html">创建账号 <i
+          aria-hidden="true" class="fa fa-long-arrow-right m-l-5"></i></a></div>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="vendor/jquery/jquery-3.2.1.min.js"></script>
+<script src="vendor/bootstrap/js/popper.js"></script>
+<script src="vendor/bootstrap/js/bootstrap.min.js"></script>
+<script src="vendor/select2/select2.min.js"></script>
+<script src="vendor/tilt/tilt.jquery.min.js"></script>
+<!-- js部分 -->
+<script type="text/javascript" src="../assets/libs/layui/layui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  let text =  "";  // 图形验证码
+  $('.js-tilt').tilt({scale: 1.1});
+
+  layui.config({
+    base: '/assets/module/'
+  }).use(['layer', 'form', 'setter', 'admin'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var setter = layui.setter;
+    $("input[name=email]").val("u2moyiyi@gmail.cn")
+    $("input[name=pass]").val("123456")
+
+    /* 更换图形验证码 */
+    function changeCode() {
+      $.get(setter.baseServer +  '/captcha', function (res) {
+        if (res.code === 0) {
+          $('img.login-captcha').attr('src', res.data.base64);
+          text = res.data.text;
+          $("input[name=code]").val(text)
+        } else {
+          layer.msg(res.message, {icon: 5});
+        }
+      });
+    }
+    $('img.login-captcha').click(function () {
+      changeCode();
+    }).trigger('click');
+    changeCode();
+    $("#login").click(function (){
+      let field = {
+        username: $("input[name=email]").val(),
+        password: $("input[name=pass]").val(),
+        code: $("input[name=code]").val(),
+      }
+
+      if(!field.username){
+        Swal.fire({
+          title: '邮箱不能为空!',
+          icon: 'error',
+          confirmButtonText: '了解'
+        })
+        return false;
+      }
+      if(!field.password){
+        Swal.fire({
+          title: '密码不能为空!',
+          icon: 'error',
+          confirmButtonText: '了解'
+        })
+        layer.msg('密码不能为空', {offset: '120px'});
+        return false;
+      }
+      if(!field.code){
+        Swal.fire({
+          title: '验证码不能为空!',
+          icon: 'error',
+          confirmButtonText: '了解'
+        })
+        return false;
+      }
+      if (field.code.toLowerCase() !== text) {
+        Swal.fire({
+          title: '验证码错误!',
+          icon: 'error',
+          confirmButtonText: '了解'
+        })
+        return false;
+      }
+      field.tenantId = 2;
+      var loadIndex = layer.msg('登录中...', {icon: 16, shade: 0.01, time: false});
+      $.ajax({
+        url: setter.baseServer + '/login',
+        data: JSON.stringify(field),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        type: 'POST',
+        dataType: 'JSON',
+        success: function (res) {
+          layer.close(loadIndex);
+          if (0 === res.code) {
+            setter.putToken(res.data);
+            layer.msg(res.message, {icon: 1, time: 1000}, function () {
+              location.replace('./');
+            });
+          } else {
+            Swal.fire({
+              title: res.message || '登录失败',
+              icon: 'error',
+              confirmButtonText: '了解'
+            });
+          }
+        },
+        error: function (xhr) {
+          layer.close(loadIndex);
+          Swal.fire({
+            title: '系统出错了~',
+            icon: 'error',
+            confirmButtonText: '了解'
+          });
+        }
+      });
+      return false;
+    })
+  });
+
+</script>
+<script src="js/main.js"></script>
+</html>

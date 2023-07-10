@@ -17,11 +17,11 @@
         <div class="analysis-chart-card-content" style="padding-top: 16px">
           <a-space size="middle">
             <span class="analysis-trend-text">
-              周同比{{ stat?.tokenWeekGrowthPercentage?.percentage }}%
+              周同比{{ stat?.tokenWeekGrowthPercentage?.percentage.toFixed(2) }}%
               <caret-up-outlined class="ele-text-danger" />
             </span>
             <span class="analysis-trend-text">
-              日同比{{ stat?.tokenDayGrowthPercentage?.percentage }}%
+              日同比{{ stat?.tokenDayGrowthPercentage?.percentage.toFixed(2) }}%
               <caret-down-outlined class="ele-text-success" />
             </span>
           </a-space>
@@ -56,14 +56,16 @@
           <div class="ele-cell-content">本月充值金额</div>
           <ele-tag color="blue">月</ele-tag>
         </div>
-        <h1 class="analysis-chart-card-num">￥6,560</h1>
+        <h1 class="analysis-chart-card-num">
+          ￥ {{ userMonthRechargeStat }}
+        </h1>
         <v-chart
           ref="payNumChartRef"
           :option="payNumChartOption"
           style="height: 40px"
         />
         <a-divider />
-        <div>累计充值：￥102023</div>
+        <div>累计充值：￥{{ stat.userRechargeStat }}</div>
       </a-card>
     </a-col>
     <a-col
@@ -85,12 +87,7 @@
         </div>
         <a-divider />
         <a-space size="middle">
-          <span class="analysis-trend-text">
-            周同比12% <caret-up-outlined class="ele-text-danger" />
-          </span>
-          <span class="analysis-trend-text">
-            日同比11% <caret-down-outlined class="ele-text-success" />
-          </span>
+          正常
         </a-space>
       </a-card>
     </a-col>
@@ -115,7 +112,7 @@
   import { useThemeStore } from '@/store/modules/theme';
   import { getPayNumList } from '@/api/dashboard/analysis';
   import useEcharts from '@/utils/use-echarts';
-  import { statApi } from '@/api/openai/ai-dashboard';
+  import { statApi, statPayNumList } from '@/api/openai/ai-dashboard';
 
   use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent]);
 
@@ -147,17 +144,22 @@
       s: 0,
       b: 0,
       percentage: 0
-    }
+    },
+    userRechargeStat: 0
   });
+  const userMonthRechargeStat = ref(0);
 
   statApi().then((data) => {
     stat.value = data;
   });
-
   /* 获取支付笔数数据 */
   const getPayNumData = () => {
-    getPayNumList()
+    statPayNumList()
       .then((data) => {
+        data.forEach((d) => {
+          userMonthRechargeStat.value =
+            userMonthRechargeStat.value + (d.value || 0);
+        });
         Object.assign(visitChartOption, {
           color: '#975fe5',
           tooltip: {
