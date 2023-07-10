@@ -281,7 +281,7 @@
         return false;
       }
       $.ajax({
-        url: setter.baseServer + '/openai/ai-user/send_email_code',
+        url: setter.baseServer + '/openai/ai-user/send_email_code?act=register',
         type: 'POST',
         dataType: 'json',
         contentType: 'application/json',

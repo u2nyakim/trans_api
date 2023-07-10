@@ -1,0 +1,142 @@
+<!-- 正文开始 -->
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-card-body">
+      <!-- 数据表格 -->
+      <table id="sysApiKeysTable" lay-filter="sysApiKeysTable"></table>
+    </div>
+  </div>
+</div>
+<!-- 表格操作列 -->
+<script type="text/html" id="sysApiKeysTbBar">
+  <a class="layui-btn layui-btn-danger layui-btn-xs"
+     data-dropdown="#sysApiKeysDrop{{d.LAY_INDEX}}" no-shade="true">删除
+  </a>
+  <div class="dropdown-menu-nav dropdown-popconfirm dropdown-top-right layui-hide"
+       id="sysApiKeysDrop{{d.LAY_INDEX}}"
+       style="max-width: 200px;white-space: normal;min-width: auto;margin-left: 10px;">
+    <div class="dropdown-anchor"></div>
+    <div class="dropdown-popconfirm-title">
+      <i class="layui-icon layui-icon-help"></i>
+      确定要删除此KEY吗？
+    </div>
+    <div class="dropdown-popconfirm-btn">
+      <a class="layui-btn" btn-cancel>取消</a>
+      <a class="layui-btn layui-btn-normal" lay-event="del">确定</a>
+    </div>
+  </div>
+</script>
+
+<!-- js部分 -->
+<script>
+  layui.use(['layer', 'form', 'table', 'tableX', 'util', 'admin', 'xmSelect', 'formX', 'dropdown', 'upload'], function () {
+    const layer = layui.layer;
+    const form = layui.form;
+    const table = layui.table;
+    const tableX = layui.tableX;
+    const util = layui.util;
+    const admin = layui.admin;
+    const setter = layui.setter;
+    form.render('select', 'sysApiKeysSearchForm');
+
+    /* 渲染表格 */
+    var insTb = tableX.render({
+      elem: '#sysApiKeysTable',
+      url: setter.baseServer + '/openai/dashboard/keys',
+      parseData: function(res) {
+        return {
+          code: res.code,
+          msg: res.message,
+          count: res.data.count,
+          data: res.data.list
+        };
+      },
+      page: false,
+      height: 'full-235',
+      toolbar: ['<p>',
+        '<button lay-event="add" class="layui-btn layui-btn-sm icon-btn"><i class="layui-icon">&#xe654;</i>生成新KEY</button>&nbsp;',
+        '<button lay-event="del" class="layui-btn layui-btn-sm layui-btn-danger icon-btn"><i class="layui-icon">&#xe640;</i>删除</button>&nbsp;',
+        '</p>'].join(''),
+      cellMinWidth: 100,
+      cols: [[
+        {type: 'checkbox'},
+        {type: 'numbers'},
+        {field: 'token', title: 'Authorization', sort: false, templet: function (d) {
+            return "Bearer " + d.token;
+        }},
+        {
+          field: 'createTime', title: '创建时间', templet: function (d) {
+            return util.toDateString(d.createTime);
+          }, sort: true, width: 160
+        },
+        {title: '操作', toolbar: '#sysApiKeysTbBar', align: 'center', width: 130, fixed: 'right'}
+      ]]
+    });
+
+    /* 表格工具条点击事件 */
+    table.on('tool(sysApiKeysTable)', function (obj) {
+      if ('del' === obj.event) { // 删除
+        doDel(obj);
+      }
+    });
+
+    /* 表格头工具栏点击事件 */
+    table.on('toolbar(sysApiKeysTable)', function (obj) {
+      if ('del' === obj.event) { // 删除
+        var checkRows = table.checkStatus('sysApiKeysTable');
+        if (!checkRows || !checkRows.data || 0 === checkRows.data.length) {
+          return layer.msg('请选择要删除的数据', {icon: 2, anim: 6});
+        }
+        var ids = checkRows.data.map(function (d) {
+          return d.id;
+        });
+        doDel({ids: ids});
+      }else if('add' === obj.event){ // 添加
+        doGenerate();
+      }
+    });
+
+    function doGenerate(){
+      var loadIndex = layer.load(2);
+      admin.req('/openai/dashboard/keys?act=generate', JSON.stringify([]), function (res) {
+        layer.close(loadIndex);
+        if (0 === res.code) {
+          layer.msg(res.message, {icon: 1});
+          insTb.reload({});
+        } else {
+          layer.msg(res.message, {icon: 2, anim: 6});
+        }
+      }, 'post');
+    }
+    /* 删除 */
+    function doDel(obj) {
+      if (obj.ids) {
+        admin.confirm('确定要删除选中数据吗？', function (i) {
+          layer.close(i);
+          var loadIndex = layer.load(2);
+          admin.req('/openai/dashboard/keys?act=delete', JSON.stringify(obj.ids), function (res) {
+            layer.close(loadIndex);
+            if (0 === res.code) {
+              layer.msg(res.message, {icon: 1});
+              insTb.reload({});
+            } else {
+              layer.msg(res.message, {icon: 2, anim: 6});
+            }
+          }, 'post');
+        });
+      } else {
+        var loadIndex = layer.load(2);
+        admin.req('/openai/dashboard/keys?act=delete', JSON.stringify([obj.data.id]),function (res) {
+          layer.close(loadIndex);
+          if (0 === res.code) {
+            layer.msg(res.message, {icon: 1});
+            insTb.reload({});
+          } else {
+            layer.msg(res.message, {icon: 2, anim: 6});
+          }
+        }, 'post');
+      }
+    }
+
+  });
+</script>

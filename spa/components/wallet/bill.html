@@ -1,0 +1,85 @@
+<!-- 正文开始 -->
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-card-body">
+      <!-- 表格工具栏 -->
+      <form class="layui-form toolbar" lay-filter="userTbSearchForm">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">账单&emsp;ID:</label>
+            <div class="layui-input-inline">
+              <input name="uuid" class="layui-input" placeholder="输入账单ID"/>
+            </div>
+          </div>
+          <div class="layui-inline">&emsp;
+            <button class="layui-btn icon-btn" lay-filter="userTbSearch" lay-submit>
+              <i class="layui-icon">&#xe615;</i>搜索
+            </button>
+          </div>
+        </div>
+      </form>
+      <!-- 数据表格 -->
+      <table id="userTable" lay-filter="userTable"></table>
+    </div>
+  </div>
+</div>
+
+<!-- js部分 -->
+<script>
+  layui.use(['layer', 'form', 'table', 'tableX', 'util', 'admin', 'xmSelect', 'formX', 'dropdown', 'upload'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var table = layui.table;
+    var tableX = layui.tableX;
+    var util = layui.util;
+    var admin = layui.admin;
+    var formX = layui.formX;
+    var setter = layui.setter;
+    var xmSelect = layui.xmSelect;
+    var roleList = [];  // 所有角色
+    form.render('select', 'userTbSearchForm');
+
+    /* 渲染表格 */
+    var insTb = tableX.render({
+      elem: '#userTable',
+      url: setter.baseServer + '/openai/dashboard/bill?status=1',
+      parseData: function(res) {
+        return {
+          code: res.code,
+          msg: res.message,
+          count: res.data.count,
+          data: res.data.list
+        };
+      },
+      page: true,
+      height: 'full-235',
+      cellMinWidth: 100,
+      cols: [[
+        {type: 'numbers'},
+        {field: 'uuid', title: '账单ID', sort: false},
+        {field: 'useToken', title: '计算Token', sort: false},
+        {field: 'fee', title: '产生费用', sort: false},
+        {
+          field: 'useModel', title: '使用模型', templet: function (d) {
+            if(d.useModel){
+              return '<span class="layui-badge layui-badge-gray">' + d.useModel + '</span>';
+            }
+            return "";
+          }, sort: true, width: 150
+        },
+        {
+          field: 'createTime', title: '创建时间', templet: function (d) {
+            return util.toDateString(d.createTime);
+          }, sort: true, width: 180
+        }
+      ]]
+    });
+
+    /* 表格搜索 */
+    form.on('submit(userTbSearch)', function (data) {
+      insTb.reload({where: data.field, page: {curr: 1}});
+      return false;
+    });
+  });
+</script>

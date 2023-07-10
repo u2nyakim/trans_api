@@ -1,0 +1,122 @@
+<!-- 正文开始 -->
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-card-body">
+      <!-- 表格工具栏 -->
+      <form class="layui-form toolbar" lay-filter="userTbSearchForm">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">来&emsp;源:</label>
+            <div class="layui-input-inline">
+              <input name="source" class="layui-input" placeholder="输入来源类型检索"/>
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">类&emsp;型:</label>
+            <div class="layui-input-inline">
+              <select name="fundType">
+                <option value="">全部类型</option>
+                <option value="10">RMB余额</option>
+                <option value="20">会话积分</option>
+              </select>
+            </div>
+          </div>
+          <div class="layui-inline">
+            <label class="layui-form-label">操&emsp;作:</label>
+            <div class="layui-input-inline">
+              <select name="changeType">
+                <option value="">全部类型</option>
+                <option value="i">增加</option>
+                <option value="d">减少</option>
+              </select>
+            </div>
+          </div>
+          <div class="layui-inline">&emsp;
+            <button class="layui-btn icon-btn" lay-filter="userTbSearch" lay-submit>
+              <i class="layui-icon">&#xe615;</i>搜索
+            </button>
+          </div>
+        </div>
+      </form>
+      <!-- 数据表格 -->
+      <table id="userFundLogTable" lay-filter="userFundLogTable"></table>
+    </div>
+  </div>
+</div>
+
+<!-- js部分 -->
+<script>
+  layui.use(['layer', 'form', 'table', 'tableX', 'util', 'admin', 'xmSelect', 'formX', 'dropdown', 'upload'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var table = layui.table;
+    var tableX = layui.tableX;
+    var util = layui.util;
+    var admin = layui.admin;
+    var formX = layui.formX;
+    var setter = layui.setter;
+    var xmSelect = layui.xmSelect;
+    var roleList = [];  // 所有角色
+    form.render('select', 'userTbSearchForm');
+
+    /* 渲染表格 */
+    var insTb = tableX.render({
+      elem: '#userFundLogTable',
+      url: setter.baseServer + '/openai/dashboard/fundlog',
+      parseData: function(res) {
+        return {
+          code: res.code,
+          msg: res.message,
+          count: res.data.count,
+          data: res.data.list
+        };
+      },
+      page: true,
+      height: 'full-235',
+      cellMinWidth: 100,
+      cols: [[
+        {type: 'numbers'},
+        {
+          field: 'fundType', title: '类型', templet: function (d) {
+            if(d.fundType === 10){
+              return '<span class="layui-badge layui-badge-blue">RMB余额</span>';
+            }
+            if(d.fundType === 20){
+              return '<span class="layui-badge layui-badge-yellow">会话积分</span>';
+            }
+            return 0;
+          }, sort: true, width: 100,align: 'center'
+        },
+        {field: 'beforeMoney', title: '变更前余额', sort: false, width: 100},
+        {
+          field: '', title: '操作', templet: function (d) {
+            if(d.changeType === "i"){
+              return '<span style="color: #0c64eb;margin-right: 5px;">增加</span>';
+            }
+            if(d.changeType === "d"){
+              return '<span style="color: #797979;margin-right: 5px;">减少</span>';
+            }
+            return '未知';
+          }, sort: false, width: 80,align: 'center'
+        },
+        {field: 'money', title: '金额', sort: false, width: 100},
+        {field: 'afterMoney', title: '变更后余额', sort: false, width: 100},
+        {field: 'source', title: '来源', sort: false, width: 250},
+        {field: 'reason', title: '备注', sort: false},
+
+        {
+          field: 'createTime', title: '创建时间', templet: function (d) {
+            return util.toDateString(d.createTime);
+          }, sort: true, width: 180
+        }
+      ]]
+    });
+
+    /* 表格搜索 */
+    form.on('submit(userTbSearch)', function (data) {
+      insTb.reload({where: data.field, page: {curr: 1}});
+      return false;
+    });
+  });
+</script>

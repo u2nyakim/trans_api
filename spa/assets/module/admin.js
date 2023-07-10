@@ -687,7 +687,7 @@ layui.define(['layer', 'setter', 'layRouter'], function (exports) {
                             setter.removeToken && setter.removeToken();
                             location.replace(option.url || '/');
                         } else {
-                            layer.msg(res.msg, {icon: 2});
+                            layer.msg(res.message, {icon: 2});
                         }
                     }, option.method || 'delete');
                 } else {

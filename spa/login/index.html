@@ -56,7 +56,7 @@
         <div class="container-login100-form-btn">
           <button class="login100-form-btn" type="button" id="login">登录</button>
         </div>
-        <div class="text-center p-t-12"><span class="txt1">忘记</span><a class="txt2" href="#">密码?</a></div>
+        <div class="text-center p-t-12"><span class="txt1">忘记</span><a class="txt2" href="../forget.html">密码?</a></div>
         <div class="text-center p-t-136"><a class="txt2" href="../register.html">创建账号 <i
           aria-hidden="true" class="fa fa-long-arrow-right m-l-5"></i></a></div>
       </form>
@@ -82,7 +82,7 @@
     var layer = layui.layer;
     var form = layui.form;
     var setter = layui.setter;
-    $("input[name=email]").val("u2moyiyi@gmail.cn")
+    $("input[name=email]").val("u2moyiyi@gmail.com")
     $("input[name=pass]").val("123456")
 
     /* 更换图形验证码 */
@@ -133,7 +133,7 @@
         })
         return false;
       }
-      if (field.code.toLowerCase() !== text) {
+      if (field.code.toLowerCase() !== text.toLowerCase()) {
         Swal.fire({
           title: '验证码错误!',
           icon: 'error',
@@ -156,7 +156,7 @@
           if (0 === res.code) {
             setter.putToken(res.data);
             layer.msg(res.message, {icon: 1, time: 1000}, function () {
-              location.replace('./');
+              location.replace('../index.html');
             });
           } else {
             Swal.fire({

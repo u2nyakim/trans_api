@@ -140,7 +140,7 @@ layui.define(['jquery', 'layer', 'form', 'upload', 'util'], function (exports) {
                         }));
                         form.render('checkbox');
                     } else {
-                        layer.msg(res.msg, {icon: 2, anim: 6});
+                        layer.msg(res.message, {icon: 2, anim: 6});
                         $('#file-choose-list').html(fileChoose.getErrorHtml('加载失败', 'layui-icon-face-cry'));
                     }
                     setTimeout(function () {
@@ -184,9 +184,9 @@ layui.define(['jquery', 'layer', 'form', 'upload', 'util'], function (exports) {
             uploadOption.done = function (res, index, upload) {
                 layer.closeAll('loading');
                 if (res.code != okCode) {
-                    layer.msg(res.msg, {icon: 2});
+                    layer.msg(res.message, {icon: 2});
                 } else {
-                    layer.msg(res.msg, {icon: 1});
+                    layer.msg(res.message, {icon: 1});
                     var dir = res.dir ? res.dir : util.toDateString(new Date(), '/yyyy/MM/dd');
                     $('#fc-current-position').text(dir);
                     loadList();

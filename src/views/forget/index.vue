@@ -85,7 +85,7 @@
       </a-form-item>
     </a-form>
     <div class="login-copyright">
-      copyright © 2022 eleadmin.com all rights reserved.
+      copyright © 2022 admin.nya.kim all rights reserved.
     </div>
   </div>
   <!-- 编辑弹窗 -->

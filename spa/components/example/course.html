@@ -224,9 +224,9 @@
                             if (res.code == 200) {
                                 layer.close(dIndex);
                                 insTb.reload({page: {curr: 1}});
-                                layer.msg(res.msg, {icon: 1});
+                                layer.msg(res.message, {icon: 1});
                             } else {
-                                layer.msg(res.msg, {icon: 2});
+                                layer.msg(res.message, {icon: 2});
                             }
                         }, 'json');
                         return false;
@@ -287,11 +287,11 @@
                                     }, function (res) {
                                         layer.closeAll('loading');
                                         if (res.code == 200) {
-                                            layer.msg(res.msg, {icon: 1});
+                                            layer.msg(res.message, {icon: 1});
                                             insTb.reload({page: {curr: 1}});
                                             insTbSSXM.reload({page: {curr: 1}});
                                         } else {
-                                            layer.msg(res.msg, {icon: 2});
+                                            layer.msg(res.message, {icon: 2});
                                         }
                                     }, 'json');
                                 }
@@ -354,9 +354,9 @@
                                             if (res.code == 200) {
                                                 layer.close(dIndex);
                                                 insTbSSXM.reload({page: {curr: 1}});
-                                                layer.msg(res.msg, {icon: 1});
+                                                layer.msg(res.message, {icon: 1});
                                             } else {
-                                                layer.msg(res.msg, {icon: 2});
+                                                layer.msg(res.message, {icon: 2});
                                             }
                                         }, 'json');
                                     }
@@ -383,10 +383,10 @@
                 }, function (res) {
                     layer.closeAll('loading');
                     if (res.code == 200) {
-                        layer.msg(res.msg, {icon: 1});
+                        layer.msg(res.message, {icon: 1});
                         insTb.reload({page: {curr: 1}});
                     } else {
-                        layer.msg(res.msg, {icon: 2});
+                        layer.msg(res.message, {icon: 2});
                     }
                 }, 'json');
             });

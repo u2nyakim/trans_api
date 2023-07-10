@@ -349,7 +349,7 @@
                         done: function (res) {
                             layer.closeAll('loading');
                             if (0 === res.code) {
-                                layer.msg(res.msg, {icon: 1});
+                                layer.msg(res.message, {icon: 1});
                                 layer.close(dIndex);
                                 insTb.reload({page: {curr: 1}});
                             } else {

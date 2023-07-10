@@ -1,0 +1,129 @@
+<!-- 正文开始 -->
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-card-body">
+      <!-- 表格工具栏 -->
+      <form class="layui-form toolbar" lay-filter="sysAiRequestTbSearchForm">
+        <div class="layui-form-item">
+          <div class="layui-inline">
+            <label class="layui-form-label">账单&emsp;ID:</label>
+            <div class="layui-input-inline">
+              <input name="billUuid" class="layui-input" placeholder="输入账单ID"/>
+            </div>
+          </div>
+          <div class="layui-inline">&emsp;
+            <button class="layui-btn icon-btn" lay-filter="sysAiRequestTbSearch" lay-submit>
+              <i class="layui-icon">&#xe615;</i>搜索
+            </button>
+          </div>
+        </div>
+      </form>
+      <!-- 数据表格 -->
+      <table id="sysAiRequestTable" lay-filter="sysAiRequestTable"></table>
+    </div>
+  </div>
+</div>
+
+<!-- js部分 -->
+<script>
+  layui.use(['layer', 'form', 'table', 'tableX', 'util', 'admin', 'xmSelect', 'formX', 'dropdown', 'upload'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var form = layui.form;
+    var table = layui.table;
+    var tableX = layui.tableX;
+    var util = layui.util;
+    var admin = layui.admin;
+    var formX = layui.formX;
+    var setter = layui.setter;
+    var xmSelect = layui.xmSelect;
+    var roleList = [];  // 所有角色
+    form.render('select', 'sysAiRequestTbSearchForm');
+
+    /* 渲染表格 */
+    var insTb = tableX.render({
+      elem: '#sysAiRequestTable',
+      url: setter.baseServer + '/openai/dashboard/aiRequestLog',
+      parseData: function(res) {
+        return {
+          code: res.code,
+          msg: res.message,
+          count: res.data.count,
+          data: res.data.list.map((d)=>{
+            try{
+              d.data = JSON.parse(d.data);
+            }catch (e){}
+            try{
+              d.result = JSON.parse(d.result);
+            }catch (e){}
+            return d;
+          })
+        };
+      },
+      page: true,
+      height: 'full-235',
+      cellMinWidth: 100,
+      limit: 20,
+      limits: [20, 50],
+      cols: [[
+        {type: 'numbers'},
+        {field: 'billUuid', title: '账单ID', sort: false, width: 300},
+
+        {field: 'statusCode', title: '状态码', width: 80, sort: false,  templet: function (d) {
+            if(d.statusCode === 200){
+              return '<span class="layui-badge layui-badge-green">' + d.statusCode + '</span>';
+            }
+            return '<span class="layui-badge layui-badge-red">' + d.statusCode + '</span>';
+          }},
+        {
+          field: 'model', title: '使用模型', templet: function (d) {
+            return '<span class="layui-badge layui-badge-gray">' + d.data.model + '</span>';
+          }, sort: false, width: 150
+        },
+        {field: 'data', title: '内容', sort: false, templet: function (d) {
+            if(!d.data.model.startsWith("dall-e:")){
+             return d.data.messages[d.data.messages.length - 1].content;
+            }else{
+              return d.data.prompt;
+            }
+
+            return JSON.stringify(d.data);
+          }},
+        // {field: 'data', title: '角色', sort: false, templet: function (d) {
+        //     if(!d.data.model.startsWith("dall-e:")){
+        //       return d.data.messages[d.data.messages.length - 1].role;
+        //     }else{
+        //       return "user";
+        //     }
+        //
+        //     return JSON.stringify(d.data);
+        //   }},
+        {field: 'result', title: '回复', sort: false, templet: function (d) {
+            if(!d.data.model.startsWith("dall-e:")){
+              if(d.result.object === 'chat.completion'){
+
+                return d.result?.['choices']?.[0]?.['message']?.content.replace(/(null)/g, "");
+              }else if(d.result.object === 'chat.completion.chunk'){
+                return d.result?.['choices']?.[0]?.['delta']?.content.toString().replace(/(null)/g, "");
+              }
+            }else{
+              return "[图片生成] 生成 " + d.result.data.length + " 张图片";
+            }
+
+            return JSON.stringify(d.result);
+       }},
+        {
+          field: 'createTime', title: '创建时间', templet: function (d) {
+            return util.toDateString(d.createTime);
+          }, sort: true, width: 180
+        }
+      ]]
+    });
+
+    /* 表格搜索 */
+    form.on('submit(sysAiRequestTbSearch)', function (data) {
+      insTb.reload({where: data.field, page: {curr: 1}});
+      return false;
+    });
+  });
+</script>

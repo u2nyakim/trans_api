@@ -82,7 +82,7 @@
       </div>
     </a-form>
     <div class="login-copyright">
-      copyright © 2022 eleadmin.com all rights reserved.
+      copyright © 2022 admin.nya.kim all rights reserved.
     </div>
     <!-- 多语言切换 -->
     <div style="position: absolute; right: 30px; top: 20px; z-index: 999">
