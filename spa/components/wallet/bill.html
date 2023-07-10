@@ -19,7 +19,7 @@
         </div>
       </form>
       <!-- 数据表格 -->
-      <table id="userTable" lay-filter="userTable"></table>
+      <table id="billTable" lay-filter="billTable"></table>
     </div>
   </div>
 </div>
@@ -42,7 +42,7 @@
 
     /* 渲染表格 */
     var insTb = tableX.render({
-      elem: '#userTable',
+      elem: '#billTable',
       url: setter.baseServer + '/openai/dashboard/bill?status=1',
       parseData: function(res) {
         return {

@@ -12,11 +12,26 @@
     <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+  <style>
+    .header .balance{
+      height: 34px;
+      padding: 0 8px;
+      margin: 0 8px;
+      background-color: #f1f1f1;
+      color: #0C0C0C;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all .3s ease-in-out;
+    }
+  </style>
 </head>
 <body class="layui-layout-body">
 <div class="layui-layout layui-layout-admin">
     <!-- 头部 -->
-    <div class="layui-header">
+    <div class="layui-header header">
         <div class="layui-logo">
             <img src="assets/images/logo.png"/>
             <cite>&nbsp; <span style="font-size:1.4em;color: #0cbb0e;">
@@ -49,9 +64,16 @@
             <li class="layui-nav-item layui-hide-xs" lay-unselect>
                 <a ew-event="fullScreen" title="全屏"><i class="layui-icon layui-icon-screen-full"></i></a>
             </li>
-            <li class="layui-nav-item layui-hide-xs" lay-unselect>
-                <a ew-event="lockScreen" title="锁屏"><i class="layui-icon layui-icon-password"></i></a>
-            </li>
+<!--            <li class="layui-nav-item layui-hide-xs" lay-unselect>-->
+<!--                <a ew-event="lockScreen" title="锁屏"><i class="layui-icon layui-icon-password"></i></a>-->
+<!--            </li>-->
+          <li class="layui-nav-item layui-hide-xs" id="refreshBalance">
+            <div class="balance" style="margin-top: 10px;"><p class="user-balance">余额：0</p>
+             <span style="padding-left: 10px;">
+                <i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate"></i>
+             </span>
+            </div>
+          </li>
             <li class="layui-nav-item" lay-unselect>
                 <a>
                     <img src="assets/images/head.jpg" class="layui-nav-img">
@@ -64,6 +86,7 @@
                     <dd lay-unselect><a ew-event="logout" data-url="login.html">退出</a></dd>
                 </dl>
             </li>
+
             <li class="layui-nav-item" lay-unselect>
                 <a ew-event="theme" title="主题"><i class="layui-icon layui-icon-more-vertical"></i></a>
             </li>

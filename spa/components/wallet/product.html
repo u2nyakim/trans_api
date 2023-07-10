@@ -1,0 +1,249 @@
+<style>
+  /** 应用列表样式 */
+  .application-list-item {
+    background-color: #fff;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .application-list-item:hover {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .15);
+  }
+
+  .application-list-item .application-list-item-header {
+    padding: 16px 12px 0 12px;
+  }
+
+  .application-list-item .application-list-item-header .head {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .application-list-item .application-list-item-header > h2 {
+    color: #333;
+    font-size: 18px;
+    display: inline-block;
+  }
+
+  .application-list-item .application-list-item-body {
+    padding: 12px 12px 12px 50px;
+    font-size: 0;
+  }
+
+  .application-list-item .application-list-item-body .text-num-item {
+    display: inline-block;
+    width: 50%;
+    font-size: 26px;
+    color: #666;
+  }
+
+  .application-list-item .application-list-item-body .text-num-item .text-num-item-title {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 10px;
+  }
+
+  .application-list-item .application-list-item-body .text-num-item small {
+    font-size: 16px;
+  }
+
+  .application-list-item .application-list-item-tool {
+    font-size: 0;
+    background-color: #FAFAFA;
+    border-top: 1px solid #e8e8e8;
+    padding: 10px 0 5px 0;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .application-list-item .application-list-item-tool .application-list-item-tool-item {
+    display: inline-block;
+    width: 25%;
+    font-size: 18px;
+    text-align: center;
+    color: #999;
+    border-right: 1px solid #e8e8e8;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+
+  .application-list-item .application-list-item-tool .application-list-item-tool-item:last-child {
+    border-right: none;
+  }
+
+  /** // 应用列表样式结束 */
+
+</style>
+
+<!-- 正文开始 -->
+<div class="layui-fluid">
+  <div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+      <ul class="layui-tab-title">
+        <li class="layui-this">会话积分购买</li>
+      </ul>
+      <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show" style="padding-top: 20px;    background-color: #f8f9fa;border-radius: 12px;">
+          <div class="layui-row layui-col-space30" id="demoCardList2"></div>
+        </div>
+      </div>
+      <div style="text-align: right;padding-right: 20px;padding-bottom: 20px;">
+        <button type="button" class="layui-btn layui-btn-disabled pay-btn">立即购买</button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <table id="productTable" lay-filter="productTable"></table>
+  </div>
+</div>
+
+<style>
+  #demoCardList2 .badge{
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    background-color: #fcbf24;
+    color: #fff;
+    padding: 2px 6px;
+  }
+  #demoCardList2 .j-value{
+    font-size: 24px;
+    color: #1877ff;
+    font-weight: bold;
+  }
+  #demoCardList2 .j-original-price{
+    font-size: 12px;
+    color: #999;
+    text-decoration: line-through;
+    margin-bottom: 2px;
+    margin-left: 4px;
+  }
+  #demoCardList2 .j-money{
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    padding-left: 2px;
+  }
+  #demoCardList2 .layui-col-md3 .j-item{
+    border: 2px solid #fff;
+  }
+  #demoCardList2 .layui-col-md3.active .j-item{
+    border: 2px solid #1877ff;
+  }
+  #demoCardList2 .application-list-item{
+    border: unset;
+  }
+</style>
+<!-- 应用模板 -->
+<script type="text/html" id="demoCardItem2">
+  <div class="layui-col-md3" data-id="{{d.id}}">
+    <div class="application-list-item j-item">
+      <div class="application-list-item-header" style="position: relative;">
+        <h2 style="color: #f4c17a;font-weight: 500;font-size: 14px;padding-left: 20px;">{{d.title}}</h2>
+        {{# if(d.badge){ }}
+        <span class="badge">
+          {{d.badge}}
+        </span>
+        {{# } }}
+      </div>
+      <div class="application-list-item-body" style="padding:0px 10px 30px 30px;">
+        <div class="text-num-item" style="width: auto;">
+          <div class="text-num-item-title">
+            <span class="j-value"> {{d.value}} 积分</span>
+          </div>
+          <div class="text-num-item-text j-money" style="font-weight: bold;">
+            {{ d.price.toFixed(2) }}
+            <small>元</small>
+            <span class="j-original-price">￥{{d.originalPrice}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</script>
+
+<!-- js部分 -->
+<script>
+  layui.use(['layer', 'dataGrid', 'element', 'dropdown', 'setter', 'admin', 'table', 'tableX','util'], function () {
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    var dataGrid = layui.dataGrid;
+    var setter = layui.setter;
+    var admin = layui.admin;
+    var table = layui.table;
+    var tableX = layui.tableX;
+    var util = layui.util;
+    /* 渲染表格 */
+    var insTb = tableX.render({
+      elem: '#productTable',
+      url: setter.baseServer + '/openai/purchase/logs',
+      parseData: function(res) {
+        return {
+          code: res.code,
+          msg: res.message,
+          count: res.data.count,
+          data: res.data.list.map(d=>{
+            d.productInfo = JSON.parse(d.productInfo);
+            return d;
+          })
+        };
+      },
+      page: true,
+      cellMinWidth: 100,
+      limit: 10,
+      limits: [10],
+      cols: [[
+        {type: 'numbers'},
+        {field: 'orderSn', title: '订单ID', sort: false, width: 300},
+        {field: 'productInfo.title', title: '产品标题', sort: false, templet: function (d){
+            return d.productInfo.title;
+          }},
+        {field: 'money', title: '支付金额', sort: false},
+        {field: 'productInfo.value', title: '充值积分', sort: false, templet: function (d){
+            return d.productInfo.value;
+          }},
+        {
+          field: 'createTime', title: '创建时间', templet: function (d) {
+            return util.toDateString(d.createTime);
+          }, sort: true, width: 180
+        }
+      ]]
+    });
+
+    /** 应用 */
+    admin.req('/openai/ai-products', function (res) {
+      dataGrid.render({
+        elem: '#demoCardList2',
+        templet: '#demoCardItem2',
+        data: res.data,
+        page: false
+      });
+    });
+
+    dataGrid.on('item(demoCardList2)', function (obj) {
+      $(".layui-col-md3.active").removeClass("active");
+      $(obj.elem).addClass("active");
+      $(".pay-btn").removeClass("layui-btn-disabled");
+    });
+    $(".pay-btn").click(function (){
+      const id = $(".layui-col-md3.active").data("id");
+      const loadIndex = layer.msg('支付中...', {icon: 16, shade: 0.01, time: false});
+      admin.req("/openai/purchase?id=" + id, JSON.stringify({}), function (res){
+        layer.msg(res.message);
+        if(res.code === 0){
+          insTb.reload({where: {}, page: {curr: 1}});
+        }
+        layer.close(loadIndex);
+        if(window.queryUser){
+          window.queryUser();
+        }
+      },'post')
+    });
+  });
+</script>

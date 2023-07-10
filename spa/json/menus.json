@@ -32,6 +32,10 @@
         {
           "title": "钱包日志",
           "path": "#/wallet/fund_change"
+        },
+        {
+          "title": "积分充值",
+          "path": "#/wallet/product"
         }
       ]},
     {
