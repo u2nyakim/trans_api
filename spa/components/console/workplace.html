@@ -146,7 +146,7 @@
                 </div>
                 <div class="layui-card-body">
                     <p class="lay-big-font">25,848</p>
-                    <p>总消耗会话积分<span class="pull-right">280 万</span></p>
+                    <p>总消耗会话积分<span class="pull-right">0</span></p>
                 </div>
             </div>
         </div>
@@ -156,8 +156,8 @@
                     账户余额<span class="layui-badge layui-badge-blue pull-right">RMB</span>
                 </div>
                 <div class="layui-card-body">
-                    <p class="lay-big-font"><span style="font-size: 26px;line-height: 1;">¥</span>12,000</p>
-                    <p>历史充值总额<span class="pull-right">68 万</span></p>
+                    <p class="lay-big-font"><span style="font-size: 26px;line-height: 1;">¥</span>0</p>
+                    <p>历史充值总额<span class="pull-right">0</span></p>
                 </div>
             </div>
         </div>
@@ -167,8 +167,8 @@
                     今日成功会话<span class="layui-badge layui-badge-red pull-right">会话请求</span>
                 </div>
                 <div class="layui-card-body">
-                    <p class="lay-big-font">1,680</p>
-                    <p>接口成功率<span class="pull-right">60%</span></p>
+                    <p class="lay-big-font">12</p>
+                    <p>请求成功率<span class="pull-right">99%</span></p>
                 </div>
             </div>
         </div>
@@ -181,8 +181,8 @@
                     </span>
                 </div>
                 <div class="layui-card-body">
-                    <p class="lay-big-font">128 <span style="font-size: 24px;line-height: 1;">位</span></p>
-                    <p>总邀请<span class="pull-right">10800 人</span></p>
+                    <p class="lay-big-font">1 <span style="font-size: 24px;line-height: 1;">位</span></p>
+                    <p>总邀请<span class="pull-right">2 人</span></p>
                 </div>
             </div>
         </div>
@@ -192,34 +192,40 @@
         <div class="layui-col-sm6" style="padding-bottom: 0;">
             <div class="layui-row layui-col-space15">
                 <div class="layui-col-xs6 layui-col-sm3">
-                    <a class="console-app-group" href="#/system/user">
+                    <a class="console-app-group" href="#/wallet/affUsers">
                         <i class="console-app-icon layui-icon layui-icon-group"
                            style="font-size: 26px;padding-top: 3px;margin-right: 6px;"></i>
                         <div class="console-app-name">我的下级</div>
                     </a>
                 </div>
+<!--                <div class="layui-col-xs6 layui-col-sm3">-->
+<!--                    <div class="console-app-group">-->
+<!--                        <i class="console-app-icon layui-icon layui-icon-chart" style="color: #95de64;"></i>-->
+<!--                        <div class="console-app-name">接口分析</div>-->
+<!--                    </div>-->
+<!--                </div>-->
                 <div class="layui-col-xs6 layui-col-sm3">
-                    <div class="console-app-group">
-                        <i class="console-app-icon layui-icon layui-icon-chart" style="color: #95de64;"></i>
-                        <div class="console-app-name">接口分析</div>
-                    </div>
-                </div>
-                <div class="layui-col-xs6 layui-col-sm3">
-                    <div class="console-app-group">
+                  <a class="console-app-group" href="#/wallet/product">
                         <i class="console-app-icon layui-icon layui-icon-cart" style="color: #ff9c6e;"></i>
                         <div class="console-app-name">购买积分</div>
-                    </div>
+                   </a>
                 </div>
                 <div class="layui-col-xs6 layui-col-sm3">
-                    <div class="console-app-group">
+                    <a class="console-app-group" href="#/wallet/bill">
                         <i class="console-app-icon layui-icon layui-icon-form"
                            style="color: #b37feb;font-size: 30px;"></i>
-                        <div class="console-app-name">我的订单</div>
-                    </div>
+                        <div class="console-app-name">我的账单</div>
+                    </a>
                 </div>
+                <div class="layui-col-xs6 layui-col-sm3">
+                <a class="console-app-group" href="#/sys/setting">
+                  <i class="console-app-icon layui-icon layui-icon-slider" style="color: #ffc069;"></i>
+                  <div class="console-app-name">系统配置</div>
+                </a>
+              </div>
             </div>
         </div>
-        <div class="layui-col-sm6" style="padding-bottom: 0;">
+        <div class="layui-col-sm6" style="padding-bottom: 0;display: none;">
             <div class="layui-row layui-col-space15">
                 <div class="layui-col-xs6 layui-col-sm3">
                     <div class="console-app-group">
@@ -242,20 +248,35 @@
                         <div class="console-app-name">标签</div>
                     </div>
                 </div>
-                <div class="layui-col-xs6 layui-col-sm3">
-                    <div class="console-app-group">
-                        <i class="console-app-icon layui-icon layui-icon-slider" style="color: #ffc069;"></i>
-                        <div class="console-app-name">系统配置</div>
-                    </div>
-                </div>
             </div>
         </div>
+      <div class="layui-col-md6">
+        <div class="layui-card">
+          <div class="layui-card-header">公告</div>
+          <div class="layui-card-body">
+            <div class="layui-carousel admin-carousel admin-news" id="workplaceNewsCarousel">
+              <div carousel-item>
+                <div>
+                  <a
+                    href="https://nya.kim/"
+                    target="_blank"
+                    style="height: 100%;color:#fff;background-color: #009688;background-image: linear-gradient(to right,#009688,#5fb878);"
+                  >
+                    <h1>系统维护通知</h1>
+                    <h2>系统将在2023-07-11 14:00 进行系统维护，请切换备用线路。</h2>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="layui-row layui-col-space15">
+    <div class="layui-row layui-col-space15" style="display: none;">
         <div class="layui-col-md8 layui-col-sm6">
             <div class="layui-row layui-col-space15">
-                <div class="layui-col-md12">
+                <div class="layui-col-md12" style="display:none;">
                   <div class="layui-card">
                     <div class="layui-card-header">公告</div>
                     <div class="layui-card-body">
@@ -449,7 +470,7 @@
         carousel.render({
             elem: '#workplaceNewsCarousel',
             width: '100%',
-            height: '70px',
+            height: '160px',
             arrow: 'none',
             autoplay: true,
             trigger: device.ios || device.android ? 'click' : 'hover',
