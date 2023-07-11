@@ -11,12 +11,8 @@
           "path": "#/console/workplace"
         },
         {
-          "title": "分析页",
-          "path": "#/console/dashboard"
-        },
-        {
-          "title": "请求记录",
-          "path": "#/sys/airequest"
+          "title": "推广用户",
+          "path": "#/wallet/affUsers"
         }
       ]
     },

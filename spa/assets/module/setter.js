@@ -3,7 +3,8 @@
 layui.define(['table'], function (exports) {
   const setter = {
     //baseServer: 'https://v2.eleadmin.com/api', // 接口地址，实际项目请换成自己的接口
-    baseServer: 'http://127.0.0.1:8081/api', // 接口地址，实际项目请换成自己的接口
+    // baseServer: 'http://127.0.0.1:8081/api', // 接口地址，实际项目请换成自己的接口
+    baseServer: 'http://43.136.130.224:18051/api', // 接口地址，实际项目请换成自己的接口
     pageTabs: true, // 是否开启多标签
     cacheTab: true, // 是否记忆Tab
     defaultTheme: '', // 默认主题

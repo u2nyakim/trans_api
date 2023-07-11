@@ -1,85 +1,235 @@
 <!-- 正文开始 -->
-<div class="layui-fluid">
+<style>
+  .user-bill-table .open-messages{
+    cursor: pointer;
+  }
+</style>
+
+<div class="layui-fluid user-bill-table">
   <div class="layui-card">
     <div class="layui-card-body">
       <!-- 表格工具栏 -->
-      <form class="layui-form toolbar" lay-filter="userTbSearchForm">
+      <form class="layui-form toolbar" lay-filter="userBillTbSearchForm">
         <div class="layui-form-item">
           <div class="layui-inline">
-            <label class="layui-form-label">账单&emsp;ID:</label>
+            <label class="layui-form-label">账单ID:</label>
             <div class="layui-input-inline">
-              <input name="uuid" class="layui-input" placeholder="输入账单ID"/>
+              <input name="uuid" class="layui-input" placeholder="输入账单ID(模糊查询)"/>
             </div>
           </div>
           <div class="layui-inline">&emsp;
-            <button class="layui-btn icon-btn" lay-filter="userTbSearch" lay-submit>
+            <button class="layui-btn icon-btn" lay-filter="userBillTbSearch" lay-submit>
               <i class="layui-icon">&#xe615;</i>搜索
             </button>
           </div>
         </div>
       </form>
       <!-- 数据表格 -->
-      <table id="billTable" lay-filter="billTable"></table>
+      <table id="userBillTable" lay-filter="userBillTable"></table>
     </div>
   </div>
 </div>
+<!-- 表单弹窗 -->
+<script type="text/html" id="userBillMessageDialog">
+  <form id="userBillMessageForm" lay-filter="userBillMessageForm" class="layui-form model-form">
+    <input name="userId" type="hidden"/>
+    <div class="layui-form-item">
+      <label class="layui-form-label layui-form-required">模型名称:</label>
+      <div class="layui-input-block">
+        <input name="model" placeholder="" value="{{ d.useModel }}" disabled class="layui-input"
+               lay-verType="tips" lay-verify="required" required/>
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label layui-form-required">请求内容:</label>
+      <div class="layui-input-block">
+        <textarea name="data" placeholder="" class="layui-textarea"
+                  lay-verType="message" lay-verify="required" readonly required>{{d.showData}}</textarea>
+      </div>
+    </div>
+    <div class="layui-form-item">
+      <label class="layui-form-label">返回内容:</label>
+      <div class="layui-input-block">
+        <textarea id="showResultEditor"></textarea>
+      </div>
+    </div>
+    <div class="layui-form-item text-right">
+      <button class="layui-btn layui-btn-primary" type="button" ew-event="closeDialog">关闭</button>
+    </div>
+  </form>
+</script>
 
 <!-- js部分 -->
+<script type="text/javascript" src="/assets/libs/tinymce/tinymce.min.js"></script>
 <script>
-  layui.use(['layer', 'form', 'table', 'tableX', 'util', 'admin', 'xmSelect', 'formX', 'dropdown', 'upload'], function () {
-    var $ = layui.jquery;
-    var layer = layui.layer;
-    var form = layui.form;
-    var table = layui.table;
-    var tableX = layui.tableX;
-    var util = layui.util;
-    var admin = layui.admin;
-    var formX = layui.formX;
-    var setter = layui.setter;
-    var xmSelect = layui.xmSelect;
-    var roleList = [];  // 所有角色
-    form.render('select', 'userTbSearchForm');
+  layui.use(['layer', 'form', 'table', 'tableX', 'util', 'admin', 'xmSelect', 'formX', 'dropdown', 'upload', 'laytpl'], function () {
+    const $ = layui.jquery;
+    const layer = layui.layer;
+    const form = layui.form;
+    const table = layui.table;
+    const tableX = layui.tableX;
+    const util = layui.util;
+    const admin = layui.admin;
+    const formX = layui.formX;
+    const setter = layui.setter;
+    const xmSelect = layui.xmSelect;
+    const laytpl = layui.laytpl;
 
+    form.render('select', 'userBillTbSearchForm');
+
+    const showResult = function (d){
+      if(d.data && d.data.model) {
+        if (!d.data.model.startsWith("dall-e:")) {
+          if (d.result.object === 'chat.completion') {
+            return d.result?.['choices']?.[0]?.['message']?.content.replace(/(null)/g, "");
+          } else if (d.result.object === 'chat.completion.chunk') {
+            return d.result?.['choices']?.[0]?.['delta']?.content.toString().replace(/(null)/g, "");
+          }
+        } else {
+          return "[图片生成] 生成 " + d.result.data.length + " 张图片";
+        }
+      }
+      return JSON.stringify(d.result);
+    }
+    const showData = function (d){
+      if(d.data && d.data.model){
+        if(!d.data.model.startsWith("dall-e:")){
+          return d.data.messages[d.data.messages.length - 1].content;
+        }else{
+          return d.data.prompt;
+        }
+      }
+      return JSON.stringify(d.data);
+    }
     /* 渲染表格 */
-    var insTb = tableX.render({
-      elem: '#billTable',
-      url: setter.baseServer + '/openai/dashboard/bill?status=1',
+    const insTb = tableX.render({
+      elem: '#userBillTable',
+      url: setter.baseServer + '/openai/u/historyBill',
       parseData: function(res) {
         return {
           code: res.code,
           msg: res.message,
           count: res.data.count,
-          data: res.data.list
+          data: res.data.list.map((d)=>{
+            try{
+              d.data = JSON.parse(d.data);
+            }catch (e){}
+            try{
+              d.result = JSON.parse(d.result);
+            }catch (e){}
+            d.showData = showData(d);
+            d.showResult = showResult(d);
+            return d;
+          })
         };
       },
       page: true,
-      height: 'full-235',
       cellMinWidth: 100,
+      limit: 15,
+      limits: [15, 30],
       cols: [[
         {type: 'numbers'},
-        {field: 'uuid', title: '账单ID', sort: false},
-        {field: 'useToken', title: '计算Token', sort: false},
-        {field: 'fee', title: '产生费用', sort: false},
+        {field: 'uuid', title: '账单ID', sort: false, width: 300},
         {
           field: 'useModel', title: '使用模型', templet: function (d) {
-            if(d.useModel){
-              return '<span class="layui-badge layui-badge-gray">' + d.useModel + '</span>';
+            if(d['useModel']){
+              return '<span class="layui-badge layui-badge-gray">' + d['useModel'] + '</span>';
             }
             return "";
-          }, sort: true, width: 150
+          }, sort: false, width: 180
         },
+        {field: 'useToken', title: '计算Token', sort: false},
+        {field: 'useFee', title: '计算Fee', sort: false},
+        {field: 'status', title: '账单状态', sort: false, templet: function (d) {
+            if(d['status']){
+              return '<span class="layui-badge layui-badge-green">付款成功</span>';
+            }
+            return '<span class="layui-badge layui-badge-red">付款失败</span>';
+        }, width: 100, align:'center'},
+        {field: 'statusCode', title: 'API状态码', width: 100, sort: false,  templet: function (d) {
+            if(d.statusCode === 200){
+              return '<span class="layui-badge layui-badge-green">' + d.statusCode + '</span>';
+            }
+            return '<span class="layui-badge layui-badge-red">' + d.statusCode + '</span>';
+          }, align:'center'},
+        {
+          field: 'action', title: 'API', templet: function (d) {
+            if(d['action'] === "ImagesGenerations"){
+              return '<span class="layui-badge layui-badge-gray open-messages" lay-event="open-messages">图片生成</span>';
+            }else if(d['action'] === "ChatCompletions"){
+              return '<span class="layui-badge layui-badge-gray open-messages" lay-event="open-messages">聊天对话</span>';
+            }
+            return "";
+          }, sort: false, width: 100
+        },
+        {field: 'showData', title: '内容', sort: false},
+        {field: 'showResult', title: '回复', sort: false},
         {
           field: 'createTime', title: '创建时间', templet: function (d) {
             return util.toDateString(d.createTime);
-          }, sort: true, width: 180
+          }, sort: true, width: 160
         }
-      ]]
+      ]],
+      done: function (){}
     });
-
+    /* 表格工具条点击事件 */
+    table.on('tool(userBillTable)', function (obj) {
+      if ('open-messages' === obj.event) { // 修改
+        showMessageModel(obj.data);
+      }
+    });
     /* 表格搜索 */
-    form.on('submit(userTbSearch)', function (data) {
+    form.on('submit(userBillTbSearch)', function (data) {
       insTb.reload({where: data.field, page: {curr: 1}});
       return false;
     });
+    /* 显示会话消息列表弹窗 */
+    function showMessageModel(mData) {
+      admin.open({
+        type: 1,
+        title: '会话内容 (' + mData.uuid + ')',
+        zIndex: 1000,
+        area: ['100%', '100%'],
+        offset: 't',
+        content: laytpl($('#userBillMessageDialog').html()).render(mData),
+        success: function (layero, dIndex) {
+          // 禁止弹窗出现滚动条
+          $(layero).children('.layui-layer-content').css('overflow', 'visible');
+          console.log("dg", "showResultEditor");
+          // 渲染富文本编辑器
+          tinymce.init({
+            selector: '#showResultEditor',
+            height: 325,
+            branding: false,
+            language: 'zh_CN',
+            plugins: 'code print preview fullscreen paste searchreplace save autosave link autolink image imagetools media table codesample lists advlist hr charmap emoticons anchor directionality pagebreak quickbars nonbreaking visualblocks visualchars wordcount',
+            toolbar: 'fullscreen preview code | undo redo | forecolor backcolor | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | outdent indent | numlist bullist | formatselect fontselect fontsizeselect | link image media emoticons charmap anchor pagebreak codesample | ltr rtl',
+            toolbar_drawer: 'sliding',
+            file_picker_types: 'media',
+            file_picker_callback: function (callback, value, meta) {
+              layer.msg('不允许上传', {anim: 6});
+            },
+            init_instance_callback: function (editor) {
+              // console.log(editor);
+            },
+            // 配置选项...
+            setup: function (editor) {
+              editor.on('init', function () {
+                tinymce.get('showResultEditor').setContent(mData.showResult);
+              });
+            }
+          });
+
+        },
+        cancel: function(){
+          tinymce.get('showResultEditor').destroy(false);
+        }
+      });
+    }
+    // 监听页面卸载并销毁编辑器
+    admin.on('destroy(wallet/bill)', function () {
+      tinymce.get('showResultEditor')?.destroy(false);
+    });
   });
+
 </script>
