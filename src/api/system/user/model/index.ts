@@ -2,6 +2,11 @@ import type { PageParam } from '@/api';
 import type { Role } from '../../role/model';
 import type { Menu } from '../../menu/model';
 
+export interface UserWallet {
+  points: number;
+  balance: number;
+  dollar: number;
+}
 /**
  * 用户
  */
@@ -30,10 +35,6 @@ export interface User {
   organizationId?: number;
   // 状态, 0正常, 1冻结
   status?: number;
-  // 余额
-  money?: number;
-  // 积分
-  score?: number;
   // 性别名称
   sexName?: string;
   // 机构名称
@@ -44,6 +45,8 @@ export interface User {
   authorities?: Menu[];
   // 创建时间
   createTime?: string;
+  // 钱包
+  wallet: UserWallet;
 }
 
 /**

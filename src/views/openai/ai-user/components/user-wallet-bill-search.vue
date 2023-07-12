@@ -2,7 +2,7 @@
 <template>
   <a-form
     :label-col="
-      styleResponsive ? { xl: 4, lg: 5, md: 7, sm: 4 } : { flex: '90px' }
+      styleResponsive ? { xl: 6, lg: 5, md: 7, sm: 4 } : { flex: '90px' }
     "
     :wrapper-col="
       styleResponsive ? { xl: 17, lg: 19, md: 17, sm: 20 } : { flex: '1' }
@@ -12,18 +12,15 @@
       <a-col
         v-bind="
           styleResponsive
-            ? { xl: 4, lg: 12, md: 12, sm: 24, xs: 24 }
+            ? { xl: 5, lg: 12, md: 12, sm: 24, xs: 24 }
             : { span: 6 }
         "
       >
-        <a-form-item label="类型">
-          <a-select
-            v-model:value="form.fundType"
-            placeholder="请选择"
-            allow-clear
-          >
-            <a-select-option :value="10">RMB余额</a-select-option>
-            <a-select-option :value="20">会话积分</a-select-option>
+        <a-form-item label="财产类型">
+          <a-select v-model:value="form.type" placeholder="请选择">
+            <a-select-option value="balance">RMB</a-select-option>
+            <a-select-option value="dollar">美金</a-select-option>
+            <a-select-option value="points">积分</a-select-option>
           </a-select>
         </a-form-item>
       </a-col>
@@ -36,12 +33,12 @@
       >
         <a-form-item label="操作">
           <a-select
-            v-model:value="form.changeType"
+            v-model:value="form.action"
             placeholder="请选择"
             allow-clear
           >
-            <a-select-option value="i">增加</a-select-option>
-            <a-select-option value="d">减少</a-select-option>
+            <a-select-option :value="2">增加</a-select-option>
+            <a-select-option :value="1">减少</a-select-option>
           </a-select>
         </a-form-item>
       </a-col>
@@ -83,20 +80,22 @@
   import { storeToRefs } from 'pinia';
   import { useThemeStore } from '@/store/modules/theme';
   import useFormData from '@/utils/use-form-data';
-  import type { UserFundChangeParam } from '@/api/system/user-fund-change/model';
+  import type { UserWalletAssetLogParam } from '@/api/system/user-wallet/model';
 
   // 是否开启响应式布局
   const themeStore = useThemeStore();
   const { styleResponsive } = storeToRefs(themeStore);
 
   const emit = defineEmits<{
-    (e: 'search', where?: UserFundChangeParam): void;
+    (e: 'search', where?: UserWalletAssetLogParam): void;
   }>();
 
   // 表单数据
-  const { form, resetFields } = useFormData<UserFundChangeParam>({
-    fundType: undefined,
-    changeType: undefined
+  const { form, resetFields } = useFormData<UserWalletAssetLogParam>({
+    type: 'balance',
+    action: undefined,
+    reason: '',
+    remark: ''
   });
 
   // 日期范围选择

@@ -13,16 +13,29 @@
         cache-key="proSystemLoginRecordTable"
       >
         <template #bodyCell="{ column, record }">
-          <template v-if="column.key === 'fundType'">
-            <a-tag v-if="record.fundType === 10" color="green">RMB余额</a-tag>
-            <a-tag v-else-if="record.fundType === 20" color="orange">
-              会话积分
+          <template v-if="column.key === 'type'">
+            <a-tag v-if="dataType === 'balance'" color="green">RMB</a-tag>
+            <a-tag v-else-if="dataType === 'dollar'" color="orange">美金</a-tag>
+            <a-tag v-else-if="dataType === 'points'" color="orange">积分</a-tag>
+          </template>
+          <template v-else-if="column.key === 'action'">
+            <a-tag v-if="record.action === 'inc'" color="cyan">增加</a-tag>
+            <a-tag v-else-if="record.action === 'dec'" color="purple">
+              减少
             </a-tag>
           </template>
-          <template v-else-if="column.key === 'changeType'">
-            <a-tag v-if="record.changeType === 'i'" color="cyan">增加</a-tag>
-            <a-tag v-else-if="record.changeType === 'd'" color="purple">
-              减少
+          <template v-else-if="column.key === 'reason'">
+            <a-tag v-if="record.reason === 'OP.INC'" color="cyan">
+              后台增加
+            </a-tag>
+            <a-tag v-else-if="record.reason === 'OP.DEC'" color="purple">
+              后台减少
+            </a-tag>
+            <a-tag v-else-if="record.reason === 'AI.CHAT'" color="purple">
+              会话聊天
+            </a-tag>
+            <a-tag v-else>
+              {{ record.reason }}
             </a-tag>
           </template>
         </template>
@@ -40,8 +53,12 @@
   } from 'ele-admin-pro/es/ele-pro-table/types';
   import { toDateString } from 'ele-admin-pro/es';
   import UserWalletBillSearch from '@/views/openai/ai-user/components/user-wallet-bill-search.vue';
-  import { pageUserFundChanges } from '@/api/system/user-fund-change';
-  import type { UserFundChangeParam } from '@/api/system/user-fund-change/model';
+  import {
+    pageWalletBalance,
+    pageWalletDollar,
+    pageWalletPoints
+  } from '@/api/system/user-wallet';
+  import type { UserWalletAssetLogParam } from '@/api/system/user-wallet/model';
   import { timeAgo } from 'ele-admin-pro/es/utils/core';
   import { User } from '@/api/system/user/model';
 
@@ -60,8 +77,8 @@
     },
     {
       title: '资产类型',
-      key: 'fundType',
-      sorter: true,
+      key: 'type',
+      sorter: false,
       showSorterTooltip: false,
       width: 100,
       align: 'left'
@@ -69,7 +86,7 @@
 
     {
       title: '操作前余额',
-      dataIndex: 'beforeMoney',
+      dataIndex: 'before',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
@@ -77,15 +94,16 @@
     },
     {
       title: '操作后余额',
-      dataIndex: 'afterMoney',
+      dataIndex: 'after',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
-      width: 160
+      width: 160,
+      customRender: ({ record }) => record.before + record.amount
     },
     {
-      title: '操作金额',
-      dataIndex: 'money',
+      title: '金额',
+      dataIndex: 'amount',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
@@ -93,15 +111,15 @@
     },
     {
       title: '操作类型',
-      key: 'changeType',
+      key: 'action',
       sorter: true,
       showSorterTooltip: false,
       width: 100,
-      align: 'center'
+      align: 'left'
     },
     {
-      title: '来源',
-      dataIndex: 'source',
+      title: '源',
+      key: 'reason',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
@@ -109,13 +127,13 @@
     },
     {
       title: '备注',
-      dataIndex: 'reason',
+      dataIndex: 'remark',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true
     },
     {
-      title: '记录时间',
+      title: '操作时间',
       dataIndex: 'createTime',
       sorter: false,
       showSorterTooltip: false,
@@ -134,6 +152,7 @@
     }
   ]);
 
+  const dataType = ref('balanc');
   // 表格数据源
   const datasource: DatasourceFunction = ({
     page,
@@ -142,13 +161,39 @@
     orders,
     filters
   }) => {
+    dataType.value = where.type;
+    let queryFunction;
+    if (where.type === 'dollar') {
+      queryFunction = pageWalletDollar;
+    } else if (where.type === 'points') {
+      queryFunction = pageWalletPoints;
+    } else {
+      queryFunction = pageWalletBalance;
+    }
     where.userId = props.data.userId;
-    return pageUserFundChanges({
+    return queryFunction({
       ...where,
       ...orders,
       ...filters,
       page,
       limit
+    }).then((res) => {
+      res.list = res.list.map(function (d) {
+        if (where.type === 'dollar') {
+          d.action = d.dollar > 0 ? 'inc' : 'dec';
+          d.before = d['beforeDollar'];
+          d.amount = d.dollar;
+        } else if (where.type === 'points') {
+          d.action = d.points > 0 ? 'inc' : 'dec';
+          d.before = d['beforePoints'];
+          d.amount = d.points;
+        } else {
+          d.action = d.amount > 0 ? 'inc' : 'dec';
+          d.before = d['beforeBalance'];
+        }
+        return d;
+      });
+      return res;
     });
   };
 
@@ -161,7 +206,7 @@
   );
 
   /* 刷新表格 */
-  const reload = (where?: UserFundChangeParam) => {
+  const reload = (where?: UserWalletAssetLogParam) => {
     tableRef?.value?.reload({ page: 1, where });
   };
   defineExpose({

@@ -29,7 +29,10 @@
               会话账单记录
             </span>
           </template>
-          <user-wallet-bill-hhscore ref="userWalletBillHhscoreRef" :data="props.data" />
+          <user-wallet-bill-hhscore
+            ref="userWalletBillHhscoreRef"
+            :data="props.data"
+          />
         </a-tab-pane>
         <a-tab-pane key="3">
           <template #tab>
@@ -61,18 +64,25 @@
                     "
                   >
                     <div style="background-color: #ececec; padding: 6px">
-                      <a-row :gutter="16">
-                        <a-col :span="12">
+                      <a-row :gutter="3">
+                        <a-col :span="8">
                           <a-card title="余额(RMB)" :bordered="false">
                             <span style="font-size: 18px">{{
-                              user.money
+                              user?.wallet?.balance || 0
                             }}</span>
                           </a-card>
                         </a-col>
-                        <a-col :span="12">
+                        <a-col :span="8">
+                          <a-card title="余额(美金账户)" :bordered="false">
+                            <span style="font-size: 18px">{{
+                              user?.wallet?.dollar || 0
+                            }}</span>
+                          </a-card>
+                        </a-col>
+                        <a-col :span="8">
                           <a-card title="会话积分(HHScore)" :bordered="false">
                             <span style="font-size: 18px">{{
-                              user.score
+                              user?.wallet?.points || 0
                             }}</span>
                           </a-card>
                         </a-col>
@@ -81,9 +91,7 @@
                   </a-col>
                   <a-col
                     v-bind="
-                      styleResponsive
-                        ? { md: 10, sm: 24, xs: 24 }
-                        : { span: 12 }
+                      styleResponsive ? { md: 8, sm: 24, xs: 24 } : { span: 12 }
                     "
                   >
                     <a-form-item label="资产操作" name="walletOper.Quota">
@@ -108,11 +116,14 @@
                             v-model:value="walletOper.AssetType"
                             style="width: 140px"
                           >
-                            <a-select-option value="money"
-                              >RMB余额</a-select-option
-                            >
-                            <a-select-option value="score">
+                            <a-select-option value="balance">
+                              RMB余额
+                            </a-select-option>
+                            <a-select-option value="points">
                               会话积分
+                            </a-select-option>
+                            <a-select-option value="dollar">
+                              美金账户
                             </a-select-option>
                           </a-select>
                         </template>
@@ -145,8 +156,8 @@
                 </a-row>
               </a-form>
             </div>
-            <a-alert message="余额操作记录(仅显示最新的10条)" type="success" />
-            <div style="margin-top: 10px">
+            <a-alert message="余额操作记录(仅显示最新的10条)" type="success" v-if="false" />
+            <div style="margin-top: 10px" v-if="false">
               <a-table
                 :columns="logColumns"
                 :data-source="logData"
@@ -192,16 +203,15 @@
   import { getUser, updateUserWallet } from '@/api/system/user';
   import { message } from 'ant-design-vue/es';
   import { toDateString } from 'ele-admin-pro';
-  import { pageUserFundChanges } from '@/api/system/user-fund-change';
   const logData = ref([]);
   const queryLogData = () => {
-    pageUserFundChanges({
-      userId: user.value.userId,
-      limit: 10,
-      source: '后台操作'
-    }).then((res) => {
-      logData.value = res.list;
-    });
+    // pageUserFundChanges({
+    //   userId: user.value.userId,
+    //   limit: 10,
+    //   source: '后台操作'
+    // }).then((res) => {
+    //   logData.value = res.list;
+    // });
   };
   const userWalletBillRef = ref<UserWalletBill | null>(null);
   const userWalletBillHhscoreRef = ref<UserWalletBillHhscore | null>(null);
@@ -279,6 +289,10 @@
       message.error('金额必须大于0');
       return false;
     }
+    if(!walletOper.value.Comments){
+      message.error('后台操作资产必须填写备注');
+      return false;
+    }
     updateUserWallet({
       userId: props.data.userId,
       assetType: walletOper.value.AssetType,
@@ -305,7 +319,7 @@
   const { styleResponsive } = storeToRefs(themeStore);
   const walletOper = ref({
     Operate: 1,
-    AssetType: 'money',
+    AssetType: 'points',
     Quota: 0,
     Comments: ''
   });
@@ -359,6 +373,7 @@
       visible: false
     }
   );
+
   const user = ref<User>({
     userId: undefined,
     username: '',
@@ -368,8 +383,11 @@
     roles: [],
     createTime: undefined,
     status: undefined,
-    money: 0,
-    score: 0
+    wallet: {
+      points: 0,
+      balance: 0,
+      dollar: 0
+    }
   });
   watch(
     () => props.visible,

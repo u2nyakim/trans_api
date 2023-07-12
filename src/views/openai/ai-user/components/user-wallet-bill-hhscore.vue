@@ -17,8 +17,11 @@
           <a-tag v-if="record.status === 1" color="green">成功</a-tag>
           <a-tag v-else-if="record.status === 0" color="red"> 失败</a-tag>
         </template>
-        <template v-else-if="column.key === 'fee'">
-          <span style="color: #1677ff" v-if="record.fee">{{ record.fee }}</span>
+        <template v-else-if="column.key === 'useFee'">
+          <span style="color: #1677ff">{{ record.useFee }}</span>
+        </template>
+        <template v-else-if="column.key === 'useModel'">
+          <a-tag>{{ record.useModel }}</a-tag>
         </template>
         <template v-else-if="column.key === 'tags'">
           <div v-if="record.tags.length > 0">
@@ -31,6 +34,9 @@
       <template #expandedRowRender="{ record }">
         <p style="margin: 0; padding-left: 50px">
           <span><a-tag>扩展属性</a-tag> {{ record.external }}</span>
+          <span style="margin-left: 20px">
+            <a-tag>api key</a-tag> {{ record.ukey }}
+          </span>
         </p>
       </template>
     </ele-pro-table>
@@ -59,8 +65,8 @@
       title: '账单ID',
       dataIndex: 'uuid',
       sorter: false,
-      showSorterTooltip: false
-      // width: 320
+      showSorterTooltip: false,
+      width: 320
     },
     {
       title: '账单标签',
@@ -68,10 +74,17 @@
       sorter: false,
       showSorterTooltip: false
     },
-
+    {
+      title: '模型',
+      key: 'useModel',
+      sorter: false,
+      showSorterTooltip: false,
+      ellipsis: true,
+      width: 200
+    },
     {
       title: '费用',
-      key: 'fee',
+      key: 'useFee',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
@@ -83,55 +96,24 @@
       dataIndex: 'status',
       sorter: false,
       showSorterTooltip: false,
-      width: 100,
-      filters: [
-        {
-          text: '成功',
-          value: 1
-        },
-        {
-          text: '失败',
-          value: 0
-        }
-      ],
-      filterMultiple: false
+      width: 100
     },
     {
-      title: '请求时间',
+      title: 'ip',
       dataIndex: 'ip',
       sorter: false,
       showSorterTooltip: false,
       ellipsis: true,
-      width: 160,
-      customRender: ({ record }) => toDateString(record.external.time)
+      width: 160
     },
     {
-      title: '结束时间',
+      title: '创建时间',
       dataIndex: 'createTime',
       sorter: true,
       showSorterTooltip: false,
       ellipsis: true,
       width: 160,
       customRender: ({ text }) => toDateString(text)
-    },
-    {
-      title: '耗时',
-      dataIndex: 'timeer',
-      sorter: false,
-      showSorterTooltip: false,
-      ellipsis: true,
-      width: 160,
-      customRender: ({ record }) => {
-        const t = (
-          (Date.parse(record.createTime) - record.external.time) /
-          1000
-        ).toFixed(3);
-        if (isNaN(Number(t))) {
-          return '超时';
-        } else {
-          return t + 's';
-        }
-      }
     }
   ]);
 

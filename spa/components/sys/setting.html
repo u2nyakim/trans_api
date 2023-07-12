@@ -62,8 +62,8 @@
       cols: [[
         {type: 'checkbox'},
         {type: 'numbers'},
-        {field: 'token', title: 'Authorization', sort: false, templet: function (d) {
-            return "Bearer " + d.token;
+        {field: 'ukey', title: 'Authorization', sort: false, templet: function (d) {
+            return "Bearer " + d['ukey'];
         }},
         {
           field: 'createTime', title: '创建时间', templet: function (d) {
@@ -89,7 +89,7 @@
           return layer.msg('请选择要删除的数据', {icon: 2, anim: 6});
         }
         var ids = checkRows.data.map(function (d) {
-          return d.id;
+          return d.ukey;
         });
         doDel({ids: ids});
       }else if('add' === obj.event){ // 添加
@@ -142,7 +142,7 @@
         });
       } else {
         var loadIndex = layer.load(2);
-        admin.req('/openai/dashboard/keys?act=delete', JSON.stringify([obj.data.id]),function (res) {
+        admin.req('/openai/dashboard/keys?act=delete', JSON.stringify([obj.data['ukey']]),function (res) {
           layer.close(loadIndex);
           if (0 === res.code) {
             layer.msg(res.message, {icon: 1});

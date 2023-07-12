@@ -43,7 +43,7 @@
   import { toDateString } from 'ele-admin-pro/es';
   import UserRecordLoginSearch from '@/views/openai/ai-user/components/user-record-login-search.vue';
   import { pageLoginRecords } from '@/api/system/login-record';
-  import type { UserFundChangeParam } from '@/api/system/user-fund-change/model';
+  import type { UserWalletAssetLogParam } from '@/api/system/user-wallet/model';
   import { timeAgo } from 'ele-admin-pro/es/utils/core';
   import { User } from '@/api/system/user/model';
 
@@ -144,7 +144,7 @@
   );
 
   /* 刷新表格 */
-  const reload = (where?: UserFundChangeParam) => {
+  const reload = (where?: UserWalletAssetLogParam) => {
     tableRef?.value?.reload({ page: 1, where });
   };
   defineExpose({

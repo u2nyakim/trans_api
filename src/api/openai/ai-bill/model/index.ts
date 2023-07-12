@@ -12,8 +12,10 @@ export interface AiBill {
   external: string;
   // 账单标签
   tags: string;
-  // 账单费用 (积分)
-  fee: number;
+  // 账单费用
+  useFee: number;
+  // 账单模型
+  useModel: string;
   // 状态, 0失败, 1成功
   status: number;
   //更新时间
